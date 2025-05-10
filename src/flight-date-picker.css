@@ -1,0 +1,559 @@
+.flight-date-picker-container{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.flight-date-picker {
+    user-select: none;
+    position: relative;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    width: auto;
+    min-width: 500px;
+    z-index: 1000;
+    overflow: hidden;
+    transition: box-shadow 0.3s, transform 0.3s, opacity 0.3s;
+    opacity: 1;
+    transform: scale(1);
+}
+
+.flight-date-picker.animating.opening {
+    opacity: 0;
+    transform: scale(0.96);
+}
+
+.flight-date-picker.animating.closing {
+    opacity: 0;
+    transform: scale(0.96);
+}
+
+.flight-date-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.flight-date-picker-header-left {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.flight-date-picker-clear, .flight-date-picker-cancel, .flight-date-picker-set {
+    background: none;
+    border: none;
+    color: #007aff;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 0 8px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+    height: 32px;
+    line-height: 32px;
+    min-width: 48px;
+    text-align: center;
+}
+
+.flight-date-picker-clear:active, .flight-date-picker-cancel:active, .flight-date-picker-set:active {
+    background: #f0f0f0;
+}
+
+.flight-date-picker-set:disabled {
+    color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+.flight-date-picker-segments.flush {
+    display: flex;
+    gap: 0;
+    justify-content: center;
+    margin: 0;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    overflow: hidden;
+    padding: 0 20px;
+}
+
+.segment {
+    flex: 1;
+    background: #f6f6f6;
+    border-radius: 16px 0 0 16px;
+    padding: 8px 0;
+    text-align: center;
+    border: 1px solid transparent;
+    transition: border 0.2s, background 0.2s;
+    margin: 0;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    margin-bottom: 6px;
+}
+
+.segment + .segment {
+    border-radius: 0 16px 16px 0;
+}
+
+.segment.active {
+    background: #fff;
+    border-color: #e0e0e0;
+    font-weight: 600;
+    z-index: 1;
+}
+.segment:first-child.active{
+    box-shadow: 3px 0 6px rgba(0,0,0,0.1);
+}
+.segment:last-child.active{
+    box-shadow: -3px 0 6px rgba(0,0,0,0.1);
+}
+
+.segment-label {
+    font-size: 15px;
+    color: #888;
+    margin-bottom: 2px;
+    font-weight: 600;
+}
+
+.segment-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #222;
+    min-height: 28px;
+}
+
+.segment-date {
+    font-size: 15px;
+    font-weight: 700;
+    color: #222;
+    text-align: center;
+}
+
+.segment-placeholder {
+    color: #bbb;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.segment-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0 24px 0 12px;
+}
+
+.segment-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    border-radius: 50%;
+    color: #666;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.segment-clear:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.flight-date-picker-selectors {
+    padding-top: 16px;
+    background: #fff;
+}
+
+.flight-date-picker-segments {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.flight-date-picker-body {
+    background: #fff;
+    margin: 0 20px 16px 20px;
+    position: relative;
+}
+
+.flight-date-picker-body.slide-left,
+.flight-date-picker-body.slide-right {
+    position: relative;
+    overflow: hidden;
+}
+
+.flight-date-picker-body.slide-left .flight-date-picker-months {
+    animation: slideLeft 0.25s cubic-bezier(.4,0,.2,1);
+}
+
+.flight-date-picker-body.slide-right .flight-date-picker-months {
+    animation: slideRight 0.25s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes slideLeft {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-60px); opacity: 0.7; }
+}
+
+@keyframes slideRight {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(60px); opacity: 0.7; }
+}
+
+.flight-date-picker-months {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.flight-date-picker-month-block {
+    min-width: 220px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.flight-date-picker-month-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #007aff;
+    margin: 12px 0 8px 0;
+    position: relative;
+}
+
+.flight-date-picker-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 4px;
+}
+
+.flight-date-picker-weekday {
+    text-align: center;
+    font-size: 12px;
+    color: #b0b0b0;
+    padding: 4px 0;
+}
+
+.flight-date-picker-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    row-gap: 2px;
+}
+
+.flight-date-picker-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: #222;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    margin: 2px 0;
+    border-radius: 0.75rem;
+}
+
+.flight-date-picker-day.today {
+    font-weight: 600;
+    color: #007aff;
+}
+
+.flight-date-picker-day.selected {
+    background: #007aff;
+    color: #fff;
+    animation: selectPulse 0.18s cubic-bezier(.4,0,.2,1);
+}
+
+.flight-date-picker-day.selected.start-date {
+    border-radius: 0.75rem 0 0 0.75rem;
+}
+.flight-date-picker-day.selected.end-date {
+    border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.flight-date-picker-day.selected:hover {
+    background: #0056b3;
+}
+
+.flight-date-picker-day.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    background: none;
+}
+
+.flight-date-picker-day.empty {
+    cursor: default;
+    background: none;
+}
+
+.flight-date-picker-day:hover:not(.empty):not(.disabled) {
+    background: #007aff;
+    color: #fff;
+}
+
+.flight-date-picker-footer {
+    padding: 12px 20px 20px 20px;
+    background: #fff;
+    border-radius: 0 0 16px 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.flight-date-picker-footer button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #f6f6f6;
+    color: #333;
+    transition: background 0.2s;
+}
+
+.flight-date-picker-footer button:hover {
+    background: #e0e0e0;
+}
+
+/* Dark theme */
+.flight-date-picker[data-theme="dark"] {
+    background: #232323;
+    color: #fff;
+}
+
+.flight-date-picker[data-theme="dark"] .flight-date-picker-header,
+.flight-date-picker[data-theme="dark"] .flight-date-picker-selectors,
+.flight-date-picker[data-theme="dark"] .flight-date-picker-body,
+.flight-date-picker[data-theme="dark"] .flight-date-picker-footer {
+    background: #232323;
+    color: #fff;
+}
+
+.flight-date-picker[data-theme="dark"] .flight-date-picker-month-label {
+    color: #4dabf7;
+}
+
+.flight-date-picker[data-theme="dark"] .flight-date-picker-day.selected {
+    background: #4dabf7;
+    color: #fff;
+}
+
+.flight-date-picker[data-theme="dark"] .flight-date-picker-day.today {
+    color: #4dabf7;
+}
+
+.flight-date-picker[data-theme="dark"] .flight-date-picker-day.disabled {
+    color: #666;
+}
+
+.flight-date-picker-day.in-range {
+    background: #e6f0ff;
+    color: #007aff;
+    border-radius: 0;
+}
+
+.flight-date-picker-prev, .flight-date-picker-next {
+    cursor: pointer;
+    color: #007aff;
+    font-size: 20px;
+    user-select: none;
+    border-radius: 50%;
+    transition: all 0.2s;
+    min-width: 32px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 5px;
+    z-index: 2;
+}
+
+.flight-date-picker-prev {
+    left: 0;
+}
+
+.flight-date-picker-next {
+    right: 0;
+}
+
+.flight-date-picker-prev:hover, .flight-date-picker-next:hover {
+    background: #e6f0ff;
+}
+
+.flight-date-picker-prev.disabled, .flight-date-picker-next.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.flight-date-picker-prev.disabled:hover, .flight-date-picker-next.disabled:hover {
+    background: #f8f8f8;
+}
+
+@keyframes selectPulse {
+    0% { transform: scale(0.8); }
+    80% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+/* Sliding animation for months */
+.flight-date-picker-months {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.flight-date-picker-months.sliding {
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    animation-fill-mode: forwards;
+}
+
+.flight-date-picker-months.sliding.left {
+    animation-name: slideLeft;
+}
+
+.flight-date-picker-months.sliding.right {
+    animation-name: slideRight;
+}
+
+@keyframes slideLeft {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-252px); /* 220px (month width) + 32px (gap) */
+    }
+}
+
+@keyframes slideRight {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(252px); /* 220px (month width) + 32px (gap) */
+    }
+}
+
+/* Buffer months */
+.flight-date-picker-month-block {
+    min-width: 220px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.flight-date-picker-month-block.buffer {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.flight-date-picker-month-block.visible {
+    position: relative;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Improved header styling */
+.flight-date-picker-title {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Responsive improvements */
+@media (max-width: 576px) {
+    .flight-date-picker {
+        min-width: 100%;
+        border-radius: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .flight-date-picker-header {
+        padding: 12px;
+    }
+
+    .segment-container {
+        padding: 0 20px 0 8px;
+    }
+
+    .segment-clear {
+        right: 4px;
+    }
+
+    .flight-date-picker-months {
+        gap: 0;
+    }
+
+    .flight-date-picker-month-block {
+        min-width: 100%;
+        width: 100%;
+    }
+
+    .flight-date-picker-prev {
+        left: 8px;
+    }
+
+    .flight-date-picker-next {
+        right: 8px;
+    }
+
+    .segment-label {
+        font-size: 13px;
+        color: #888;
+        margin-bottom: 2px;
+        font-weight: 600;
+    }
+    
+    .segment-value {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #222;
+        min-height: unset;
+    }
+    .segment-date{
+        font-size: 12px;
+    }
+} 
