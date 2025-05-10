@@ -1,18 +1,20 @@
 # Flight Date Picker
 
-A modern, customizable jQuery date range picker inspired by flight booking interfaces.
+A modern, responsive date range picker with a beautiful UI and smooth animations. Built with jQuery and vanilla JavaScript.
 
 ## Features
 
-- Date range selection
-- Single date selection
-- Min/max date constraints
-- Disabled dates support
-- Dark theme support
-- Responsive design
-- Customizable styling
-- Event callbacks
-- jQuery plugin
+- 🎨 Beautiful, modern UI with smooth animations
+- 📱 Fully responsive design
+- 🌓 Dark mode support
+- 🎯 Single date or date range selection
+- ⚡ Smooth sliding animations for month navigation
+- 🕒 Timezone support
+- 📅 Min/max date constraints
+- 🎯 Clear date selection
+- 🔄 Auto-apply or manual apply options
+- 🎨 Customizable styling
+- 🌐 Localization support
 
 ## Installation
 
@@ -20,55 +22,30 @@ A modern, customizable jQuery date range picker inspired by flight booking inter
 npm install flight-date-picker
 ```
 
-Or include the files directly in your HTML:
-
-```html
-<link rel="stylesheet" href="path/to/flight-date-picker.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="path/to/flight-date-picker.js"></script>
-```
-
 ## Usage
-
-Basic usage:
-
-```javascript
-$('#datepicker').flightDatePicker();
-```
-
-With options:
 
 ```javascript
 $('#datepicker').flightDatePicker({
-    startDate: null,
+    startDate: new Date(),
     endDate: null,
     minDate: null,
     maxDate: null,
-    disabledDates: [],
     format: 'YYYY-MM-DD',
+    popupDateFormat: "YYYY-MM-DD",
     locale: 'en',
-    theme: 'light',
-    showWeekNumbers: true,
-    showToday: true,
     showClear: true,
     showClose: true,
     showApply: true,
     singleDate: false,
-    autoClose: true,
-    inline: false,
-    position: 'auto',
-    onChange: function(startDate, endDate) {
-        console.log('Selected dates:', startDate, endDate);
-    },
-    onSelect: function(startDate, endDate) {
-        console.log('Dates selected:', startDate, endDate);
-    },
-    onClose: function() {
-        console.log('Date picker closed');
-    },
-    onOpen: function() {
-        console.log('Date picker opened');
-    }
+    onChange: null,
+    onSelect: null,
+    onClose: null,
+    onOpen: null,
+    onInit: null,
+    autoApply: true,
+    startLabel: 'Start Date',
+    endLabel: 'End Date',
+    timezone: "UTC"
 });
 ```
 
@@ -80,57 +57,57 @@ $('#datepicker').flightDatePicker({
 | endDate | Date | null | Initial end date |
 | minDate | Date | null | Minimum selectable date |
 | maxDate | Date | null | Maximum selectable date |
-| disabledDates | Array | [] | Array of dates that cannot be selected |
-| format | String | 'YYYY-MM-DD' | Date format string |
+| format | String | 'YYYY-MM-DD' | Input field date format |
+| popupDateFormat | String | 'YYYY-MM-DD' | Date format in popup |
 | locale | String | 'en' | Locale for date formatting |
-| theme | String | 'light' | Theme ('light' or 'dark') |
-| showWeekNumbers | Boolean | true | Show week numbers |
-| showToday | Boolean | true | Show today's date |
 | showClear | Boolean | true | Show clear button |
 | showClose | Boolean | true | Show close button |
 | showApply | Boolean | true | Show apply button |
 | singleDate | Boolean | false | Enable single date selection |
-| autoClose | Boolean | true | Close picker after selection |
-| inline | Boolean | false | Show picker inline |
-| position | String | 'auto' | Position of the picker |
-| onChange | Function | null | Callback when dates change |
-| onSelect | Function | null | Callback when dates are selected |
-| onClose | Function | null | Callback when picker closes |
-| onOpen | Function | null | Callback when picker opens |
+| autoApply | Boolean | true | Auto apply on date selection |
+| startLabel | String | 'Start Date' | Label for start date |
+| endLabel | String | 'End Date' | Label for end date |
+| timezone | String | 'UTC' | Timezone for date handling |
+
+## Events
+
+| Event | Description |
+|-------|-------------|
+| onChange | Triggered when dates change |
+| onSelect | Triggered when a date is selected |
+| onClose | Triggered when picker is closed |
+| onOpen | Triggered when picker is opened |
+| onInit | Triggered when picker is initialized |
 
 ## Methods
 
 ```javascript
-// Get the date picker instance
-const picker = $('#datepicker').data('flightDatePicker');
+// Open picker
+$('#datepicker').flightDatePicker('open');
 
-// Open the picker
-picker.open();
+// Close picker
+$('#datepicker').flightDatePicker('close');
 
-// Close the picker
-picker.close();
-
-// Clear selected dates
-picker.clear();
+// Clear dates
+$('#datepicker').flightDatePicker('clear');
 
 // Get selected dates
-const { startDate, endDate } = picker.options;
+$('#datepicker').flightDatePicker('getDates');
+
+// Switch between single date and range
+$('#datepicker').flightDatePicker('switchDateType', 'single'); // or 'range'
 ```
 
-## Events
+## Styling
 
-The date picker triggers the following events:
+The picker comes with a default light theme and supports dark mode. You can customize the appearance by overriding the CSS variables or modifying the CSS classes.
 
-- `change.flightDatePicker`: When dates change
-- `select.flightDatePicker`: When dates are selected
-- `close.flightDatePicker`: When picker closes
-- `open.flightDatePicker`: When picker opens
-
-Example:
+### Dark Mode
 
 ```javascript
-$('#datepicker').on('change.flightDatePicker', function(e, startDate, endDate) {
-    console.log('Dates changed:', startDate, endDate);
+$('#datepicker').flightDatePicker({
+    // ... other options
+    theme: 'dark'
 });
 ```
 
@@ -140,8 +117,11 @@ $('#datepicker').on('change.flightDatePicker', function(e, startDate, endDate) {
 - Firefox (latest)
 - Safari (latest)
 - Edge (latest)
-- IE 11 (with polyfills)
+
+## Dependencies
+
+- jQuery 3.0+
 
 ## License
 
-MIT 
+MIT License 
