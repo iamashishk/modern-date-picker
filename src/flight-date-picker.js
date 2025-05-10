@@ -313,7 +313,7 @@ import './flight-date-picker.css';
                     startMonth.setMonth(startMonth.getMonth() - (monthsToShow + 1));
                     
                     // Adjust currentMonth if needed
-                    if (this.currentMonth > maxMonth) {
+                    if (this.currentMonth > maxMonth) { 
                         this.currentMonth = new Date(maxMonth);
                         this.currentMonth.setMonth(this.currentMonth.getMonth() - monthsToShow + 1);
                     }
