@@ -50,7 +50,7 @@
     align-items: center;
 }
 
-.flight-date-picker-clear, .flight-date-picker-cancel, .flight-date-picker-set {
+.flight-date-picker-clear, .flight-date-picker-cancel, .flight-date-picker-apply {
     background: none;
     border: none;
     color: #007aff;
@@ -66,11 +66,11 @@
     text-align: center;
 }
 
-.flight-date-picker-clear:active, .flight-date-picker-cancel:active, .flight-date-picker-set:active {
+.flight-date-picker-clear:active, .flight-date-picker-cancel:active, .flight-date-picker-apply:active {
     background: #f0f0f0;
 }
 
-.flight-date-picker-set:disabled {
+.flight-date-picker-apply:disabled {
     color: #b0b0b0;
     cursor: not-allowed;
 }

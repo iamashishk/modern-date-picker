@@ -130,17 +130,24 @@
             try {
                 $('#basic').flightDatePicker({
                     autoApply: true,
-                    startDate: "2025-05-10T00:00:00",
-                    endDate: "2025-06-13T00:00:00",
-                    minDate: new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate() - 1)).toISOString(),
-                    maxDate: new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate() + 360)).toISOString(),
+                    // startDate: "2025-06-11T00:00:00",
+                    // endDate: "2025-06-13T00:00:00",
+                    minDate: 0,
+                    maxDate: 83,
                     startLabel: 'Departure',
                     endLabel: 'Return',
                     popupDateFormat: "MMM DD, YYYY",
-                    timezone: "Asia/Kolkata",
+                    timezone: "America/New_York",
+                    // singleDate: true,
                     onChange: function(startDate, endDate) {
                         // console.log("start", startDate);
                         // console.log("end", endDate);
+                    },
+                    onInit: function(options) {
+                        console.log(options.minDate.format('YYYY-MM-DD'));
+                        console.log(options.minDateMonth.format('YYYY-MM-DD'));
+                        console.log(options.maxDate.format('YYYY-MM-DD'));
+                        console.log(options.maxDateMonth.format('YYYY-MM-DD'));
                     }
                 });
             } catch (error) {

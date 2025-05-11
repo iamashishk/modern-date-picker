@@ -1,5 +1,8 @@
-import { type } from 'jquery';
 import './flight-date-picker.css';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 (function($) {
     'use strict'; 
@@ -9,16 +12,18 @@ import './flight-date-picker.css';
         this.$element = $(element);
         this.options = $.extend({}, FlightDatePicker.defaults, options);
         if(options.startDate){
-            options.startDate = new Date(this._getFormattedDate(options.startDate,"YYYY-MM-DD\THH:mm:ss"));
+            options.startDate = dayjs(options.startDate).startOf('day');
         }
         if(options.endDate){
-            options.endDate = new Date(this._getFormattedDate(options.endDate,"YYYY-MM-DD\THH:mm:ss"));
+            options.endDate = dayjs(options.endDate).endOf('day');
         }
-        if(options.minDate){
-            options.minDate = new Date(this._getFormattedDate(options.minDate,"YYYY-MM-DD\THH:mm:ss"));
+        if(options.minDate!==null){
+            options.minDate = dayjs().utc().add(options.minDate,'days').startOf('day');
+            options['minDateMonth'] = options.minDate.clone().startOf('month');
         }
         if(options.maxDate){
-            options.maxDate = new Date(this._getFormattedDate(options.maxDate,"YYYY-MM-DD\THH:mm:ss"));
+            options.maxDate = dayjs().utc().add(options.maxDate,'days').endOf('day');
+            options['maxDateMonth'] = options.maxDate.clone().startOf('month');
         }
         this.options = $.extend({}, FlightDatePicker.defaults, options);
         this.init();
@@ -41,7 +46,7 @@ import './flight-date-picker.css';
         onClose: null,
         onOpen: null,
         onInit: null,
-        autoApply: true,
+        autoApply: false,
         startLabel: 'Start Date',
         endLabel: 'End Date',
         timezone: "UTC",
@@ -68,6 +73,9 @@ import './flight-date-picker.css';
                 e.preventDefault();
                 this.toggle();
             });
+            if (typeof this.options.onInit === 'function') {
+                this.options.onInit.call(this, this.options);
+            }
         },
         buildCalendar: function() {
             this.$calendar = $('<div class="flight-date-picker"></div>');
@@ -98,8 +106,11 @@ import './flight-date-picker.css';
                 if($(this).hasClass('disabled')) return;
                 const dateStr = $(this).data('date');
                 if (!dateStr) return;
-                const date = new Date(dateStr);
+                const date = dayjs.utc(dateStr);
                 self.selectDate(date);
+            });
+            this.$calendar.on('click', '.flight-date-picker-apply', function() {
+                self.apply(true);
             });
             this.$calendar.on('click', '.flight-date-picker-clear', function() {
                 self.clear();
@@ -120,7 +131,6 @@ import './flight-date-picker.css';
                 const type = $(this).data('type');
                 if (type === 'start') {
                     self.options.startDate = null;
-                    self.options.endDate = null;
                 } else if (type === 'end') {
                     self.options.endDate = null;
                 }
@@ -135,7 +145,6 @@ import './flight-date-picker.css';
                 }
                 self.render();
             });
-            // Document click to close
             this.boundDocumentClick = function(e) {
                 if (self.popupOpen) {
                     // const $container = self.$calendar;
@@ -154,7 +163,6 @@ import './flight-date-picker.css';
                 }
             };
             $(document).on('click', this.boundDocumentClick);
-            // Window resize
             this.boundResize = function() { self.render(); };
             $(window).on('resize', this.boundResize);
         },
@@ -165,41 +173,26 @@ import './flight-date-picker.css';
             if (this.boundResize) $(window).off('resize', this.boundResize);
             this.boundDocumentClick = null;
             this.boundResize = null;
-            // Do NOT unbind input click here
         },
 
         moveMonth: function(delta) {
-            if (!this.currentMonth) {
-                this.currentMonth = this.options.startDate ? new Date(this.options.startDate) : new Date();
-                this.currentMonth.setDate(1);
+            if(!this.currentMonth) return;
+            const newMonth = this.currentMonth.clone().add(delta,'month');
+            if (this.options.minDate && this.options.minDate.diff(newMonth,'month')>0){
+                return;
             }
-            // Calculate the new month
-            const newMonth = new Date(this.currentMonth);
-            newMonth.setMonth(newMonth.getMonth() + delta);
-            // Check minDate/maxDate
-            if (this.options.minDate) {
-                const minMonth = new Date(this.options.minDate.getFullYear(), this.options.minDate.getMonth(), 1);
-                if (newMonth < minMonth) return;
+            if (this.options.maxDate && this.options.maxDate.diff(newMonth,'month') < this.getMonthsToShow()-1){
+                return;
             }
-            if (this.options.maxDate) {
-                const maxMonth = new Date(this.options.maxDate.getFullYear(), this.options.maxDate.getMonth(), 1);
-                console.log(newMonth,maxMonth,newMonth > maxMonth)
-                if (newMonth > maxMonth) return;
-            }
-
-            // Animate slide
+            
             const slideDirection = delta > 0 ? 'left' : 'right';
             const monthsContainer = this.$body.find('.flight-date-picker-months');
             
-            // Add sliding class to trigger animation
             monthsContainer.addClass('sliding ' + slideDirection);
             
-            // Update current month and re-render after animation
-            setTimeout(() => {
-                this.currentMonth = newMonth;
-                this.renderMonthsOnly();
-                monthsContainer.removeClass('sliding left right');
-            }, 300);
+            this.currentMonth = newMonth;
+            this.renderMonthsOnly();
+            monthsContainer.removeClass('sliding left right');
         },
 
         render: function() {
@@ -211,31 +204,26 @@ import './flight-date-picker.css';
         },
 
         renderHeader: function() {
-            let buttons = `<button class="flight-date-picker-cancel">Cancel</button>`;
-            let setBtn = '';
+            let leftButtons = `<button class="flight-date-picker-cancel">Cancel</button>`;
+            let rightButtons = '';
             if (!this.options.autoApply) {
-                buttons += `<button class="flight-date-picker-clear">Clear</button>`;
-                setBtn = `<button class="flight-date-picker-set">Set</button>`;
+                leftButtons += `<button class="flight-date-picker-clear" type="button">Clear</button>`;
+                rightButtons += `<button class="flight-date-picker-apply" type="button">Set</button>`;
             }else{
-                setBtn = `<button class="flight-date-picker-clear">Clear</button>`;
+                rightButtons += `<button class="flight-date-picker-clear" type="button">Clear</button>`;
             }
             this.$header.html(`
-                <div class="flight-date-picker-header-left">${buttons}</div>
+                <div class="flight-date-picker-header-left">${leftButtons}</div>
                 <span class="flight-date-picker-title"></span>
-                ${setBtn}
+                <div class="flight-date-picker-header-right">${rightButtons}</div>
             `);
-            const self = this;
-            this.$header.find('.flight-date-picker-set').off('click').on('click', function() {
-                self.apply();
-            });
-            // Disable Set if not ready
             if (!this.options.autoApply) {
                 if (!this.options.singleDate && (!this.options.startDate || !this.options.endDate)) {
-                    this.$header.find('.flight-date-picker-set').prop('disabled', true);
+                    this.$header.find('.flight-date-picker-apply').prop('disabled', true);
                 } else if (this.options.singleDate && !this.options.startDate) {
-                    this.$header.find('.flight-date-picker-set').prop('disabled', true);
+                    this.$header.find('.flight-date-picker-apply').prop('disabled', true);
                 } else {
-                    this.$header.find('.flight-date-picker-set').prop('disabled', false);
+                    this.$header.find('.flight-date-picker-apply').prop('disabled', false);
                 }
             }
         },
@@ -250,11 +238,11 @@ import './flight-date-picker.css';
             let outboundClear = '';
             let returnClear = '';
             if (this.options.startDate) {
-                outbound = `<span class="segment-date">${this.formatDate(this.options.startDate)}</span>`;
+                outbound = `<span class="segment-date">${this.options.startDate.format(this.options.popupDateFormat)}</span>`;
                 outboundClear = '<span class="segment-clear" data-type="start">&#10005;</span>';
             }
             if (this.options.endDate) {
-                ret = `<span class="segment-date">${this.formatDate(this.options.endDate)}</span>`;
+                ret = `<span class="segment-date">${this.options.endDate.format(this.options.popupDateFormat)}</span>`;
                 returnClear = '<span class="segment-clear" data-type="end">&#10005;</span>';
             }
             const activeStart = (this.activeSelector === 'start' || (!this.activeSelector && (!this.options.startDate || (this.options.startDate && this.options.endDate)))) ? 'active' : '';
@@ -280,69 +268,61 @@ import './flight-date-picker.css';
         renderMonthsOnly: function(slideDirection = null) {
             if (!this.$body) return;
             const monthsToShow = this.getMonthsToShow();
-            
-            // Initialize currentMonth if not set
-            if (!this.currentMonth) {
-                if (this.options.startDate) {
-                    this.currentMonth = new Date(this.options.startDate);
-                } else if (this.options.minDate && new Date() < this.options.minDate) {
-                    this.currentMonth = new Date(this.options.minDate);
-                } else {
-                    this.currentMonth = new Date();
+            let monthArrayLength = monthsToShow,leftMonthPad=0,rightMonthPad=0;
+
+            let monthArrayStart = this.currentMonth;
+            if(!monthArrayStart){
+                if(this.options.startDate){
+                    monthArrayStart = dayjs.utc(this.options.startDate).startOf('month');
+                }else if(this.options.minDateMonth){
+                    monthArrayStart = dayjs.utc(this.options.minDateMonth).startOf('month');
+                }else{
+                    monthArrayStart = dayjs.utc().startOf('month');
                 }
-                this.currentMonth.setDate(1);
             }
 
-            let base = new Date(this.currentMonth);
-            base.setDate(1);
-            let startMonth = new Date(base);
-            startMonth.setMonth(startMonth.getMonth() - 1);
-            let endMonth = new Date(base);
-            endMonth.setMonth(endMonth.getMonth() + monthsToShow);
-
-            if (this.options.minDate) {
-                const minMonth = new Date(this.options.minDate.getFullYear(), this.options.minDate.getMonth(), 1);
-                if (startMonth < minMonth) startMonth = new Date(minMonth);
-            }
-            if (this.options.maxDate) {
-                const maxMonth = new Date(this.options.maxDate.getFullYear(), this.options.maxDate.getMonth() + 1, 1);
-                if (endMonth > maxMonth) {
-                    // Ensure we have at least monthsToShow + 1 months before maxDate
-                    endMonth = new Date(maxMonth);
-                    startMonth = new Date(maxMonth);
-                    startMonth.setMonth(startMonth.getMonth() - (monthsToShow + 1));
-                    
-                    // Adjust currentMonth if needed
-                    if (this.currentMonth > maxMonth) { 
-                        this.currentMonth = new Date(maxMonth);
-                        this.currentMonth.setMonth(this.currentMonth.getMonth() - monthsToShow + 1);
-                    }
+            if(this.options.minDateMonth){
+                if(monthArrayStart.subtract(1,'month').diff(this.options.minDateMonth,'month') >= 0){
+                    monthArrayStart = monthArrayStart.subtract(1,'month');
+                    monthArrayLength++;
+                    leftMonthPad++;
                 }
+            }else{
+                monthArrayLength++;
+                leftMonthPad++;
+            }
+
+            if(this.options.maxDateMonth){
+                if(monthArrayStart.add(monthsToShow+1,'month').diff(this.options.maxDateMonth,'month') <= 0){
+                    console.log("A1");
+                    monthArrayLength++;
+                    rightMonthPad++;
+                }else if(this.options.maxDateMonth.diff(monthArrayStart,'month')+1 <= monthArrayLength){
+                    console.log("A2");
+                    monthArrayLength = this.options.maxDateMonth.diff(monthArrayStart,'month')+1;
+                    rightMonthPad = 0;
+                }else{
+                    console.log("A3",this.options.maxDateMonth.diff(monthArrayStart,'month'));
+                }
+            }else{
+                console.log("A4");
+                monthArrayLength++;
+                rightMonthPad++;
             }
 
             const months = [];
-            let m = new Date(startMonth);
-
-            while (m <= endMonth) {
-                months.push(new Date(m));
-                m.setMonth(m.getMonth() + 1);
-            }
-
-            console.log(monthsToShow,months)
-
-            let visibleStart = 1;
-            let visibleEnd = monthsToShow;
-            if (months.length < monthsToShow + 2) {
-                visibleStart = 0;
-                visibleEnd = months.length - 2;
-            }
             
-            console.log(visibleStart,visibleEnd)
+            for(let monthIndex = 0; monthIndex < monthArrayLength; monthIndex++){
+                months.push(monthArrayStart.add(monthIndex,'month'));
+            }
 
-            const prevDisabled = typeof months[visibleStart-1] === 'undefined';
-            const nextDisabled = typeof months[visibleEnd+1] !== 'undefined' && months[visibleEnd+1] > this.options.maxDate;
+            console.log(months,monthArrayStart.format('YYYY-MM-DD'),monthArrayLength,leftMonthPad,rightMonthPad);
+            
+            let visibleStart = leftMonthPad;
+            let visibleEnd = monthArrayLength - rightMonthPad;
 
-            // console.log(prevDisabled,nextDisabled)
+            const prevDisabled = leftMonthPad === 0;
+            const nextDisabled = rightMonthPad === 0;
             
             let html = `
                 <div class="flight-date-picker-prev${prevDisabled ? ' disabled' : ''}" aria-disabled="${prevDisabled}">&#8592;</div>
@@ -350,13 +330,17 @@ import './flight-date-picker.css';
             
             for (let i = 0; i < months.length; i++) {
                 const month = months[i];
-                const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
-                const firstDay = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
+                const daysInMonth = month.daysInMonth();
+                const firstDay = month.startOf('month').day();
                 
-                const isVisible = i >= visibleStart && i <= visibleEnd;
+                const isVisible = i >= visibleStart && i < visibleEnd;
+
+                if(isVisible && !this.currentMonth){
+                    this.currentMonth=month;
+                }
                 html += `<div class="flight-date-picker-month-block ${isVisible ? 'visible' : 'buffer'}">
                     <div class="flight-date-picker-month-label">
-                        <span>${month.toLocaleString('default', { month: 'long' })} ${month.getFullYear()}</span>
+                        <span>${month.format('MMM')} ${month.format('YYYY')}</span>
                     </div>
                     <div class="flight-date-picker-weekdays">`;
                 
@@ -370,13 +354,13 @@ import './flight-date-picker.css';
                     html += '<div class="flight-date-picker-day empty"></div>';
                 }
                 for (let d = 1; d <= daysInMonth; d++) {
-                    const date = new Date(month.getFullYear(), month.getMonth(), d);
+                    const date = month.clone().date(d);
                     const isInRange = this.isInRange(date);
                     const isDisabled = this.isDisabled(date);
                     const dateType = this.selectedDateType(date);
                     const isSelected = this.isSelected(date);
                     html += `
-                        <div class="flight-date-picker-day ${typeof dateType==="string"?dateType+'-date':''}  ${isSelected ? 'selected' : ''} ${isInRange ? 'in-range' : ''} ${isDisabled ? 'disabled' : ''}" data-date="${this._getFormattedDate(date,"YYYY-MM-DD\THH:mm:ss")}">${d}</div>
+                        <div class="flight-date-picker-day ${typeof dateType==="string"?dateType+'-date':''}  ${isSelected ? 'selected' : ''} ${isInRange ? 'in-range' : ''} ${isDisabled ? 'disabled' : ''}" data-date="${date.format('YYYY-MM-DD\THH:mm:ss')}">${d}</div>
                     `;
                 }
                 html += '</div></div>';
@@ -386,7 +370,6 @@ import './flight-date-picker.css';
             
             this.$body.html(html);
             
-            // Animate if needed
             if (slideDirection) {
                 const $months = this.$body.find('.flight-date-picker-months');
                 setTimeout(() => {
@@ -488,6 +471,7 @@ import './flight-date-picker.css';
         apply: function(autoClose=true) {
             if (this.options.startDate) {
                 const format = this.formatDate(this.options.startDate);
+                console.log("apply",format);
                 if (this.options.endDate) {
                     this.$element.val(`${format} - ${this.formatDate(this.options.endDate)}`);
                 } else {
@@ -499,56 +483,37 @@ import './flight-date-picker.css';
                 this.options.onChange.call(this, this.options.startDate, this.options.endDate);
             }
             if(autoClose){
-                if ((this.options.singleDate && this.options.startDate && this.options.autoApply) || 
-                    (!this.options.singleDate && this.options.startDate && this.options.endDate && this.options.autoApply)) {
+                if ((this.options.singleDate && this.options.startDate) || 
+                    (!this.options.singleDate && this.options.startDate && this.options.endDate)) {
                     this.close();
                 }
             }
         },
 
         formatDate: function(date) {
-            if (!(date instanceof Date) || isNaN(date)) return '';
-            return date.toDateString();
+            if (!(date instanceof Object) || isNaN(date)) return '';
+            return date.format(this.options.format);
         },
 
         isToday: function(date) {
-            const today = new Date();
-            return date.getDate() === today.getDate() &&
-                   date.getMonth() === today.getMonth() &&
-                   date.getFullYear() === today.getFullYear();
+            return dayjs.utc(date).isSame(dayjs.utc(),'day');
         },
 
         isSelected: function(date) {
-            if (!this.options.startDate || !(date instanceof Date) || isNaN(date)) return false;
-            
-            // Normalize dates to start of day for comparison
-            const normalizedDate = new Date(date);
-            normalizedDate.setHours(0, 0, 0, 0);
+            if (!this.options.startDate || !(date instanceof Object) || isNaN(date)) return false;
+
+            const normalizedDate = date.clone().startOf('day');
             
             if (this.options.singleDate) {
-                const normalizedStartDate = new Date(this.options.startDate);
-                normalizedStartDate.setHours(0, 0, 0, 0);
-                return normalizedDate.getTime() === normalizedStartDate.getTime();
+                return this.options.startDate && normalizedDate.isSame(dayjs.utc(this.options.startDate).startOf('day'),'day');
             }
 
             if (this.options.startDate && (this.activeSelector === null || this.activeSelector === 'start')) {
-                const normalizedStartDate = new Date(this.options.startDate);
-                normalizedStartDate.setHours(0, 0, 0, 0);
-                if (normalizedDate.getTime() === normalizedStartDate.getTime()) {
-                    this.activeSelector = 'end';
-                    return true;
-                }
-                return false;
+                return normalizedDate.isSame(dayjs.utc(this.options.startDate).startOf('day'),'day');
             }
 
             if (this.options.endDate && this.activeSelector === 'end') {
-                const normalizedEndDate = new Date(this.options.endDate);
-                normalizedEndDate.setHours(0, 0, 0, 0);
-                if (normalizedDate.getTime() === normalizedEndDate.getTime()) {
-                    this.activeSelector = 'start';
-                    return true;
-                }
-                return false;
+                return normalizedDate.isSame(dayjs.utc(this.options.endDate).startOf('day'),'day');
             }
 
             return false;
@@ -568,26 +533,14 @@ import './flight-date-picker.css';
         },
 
         isDisabled: function(date) {
-            if (!(date instanceof Date) || isNaN(date)) return true;
-            if (this.options.minDate && date < this.options.minDate) return true;
-            if (this.options.maxDate && date > this.options.maxDate) return true;
+            if (!(date instanceof Object) || isNaN(date)) return true;
+            if (this.options.minDate && date.isBefore(this.options.minDate)) return true;
+            if (this.options.maxDate && date.isAfter(this.options.maxDate)) return true;
         },
 
         isInRange: function(date) {
             if (!this.options.startDate || !this.options.endDate) return false;
-            
-            // Normalize dates to start of day for comparison
-            const normalizedDate = new Date(date);
-            normalizedDate.setHours(0, 0, 0, 0);
-            
-            const normalizedStartDate = new Date(this.options.startDate);
-            normalizedStartDate.setHours(0, 0, 0, 0);
-            
-            const normalizedEndDate = new Date(this.options.endDate);
-            normalizedEndDate.setHours(0, 0, 0, 0);
-            
-            return normalizedDate.getTime() > normalizedStartDate.getTime() && 
-                   normalizedDate.getTime() < normalizedEndDate.getTime();
+            else return date.isAfter(this.options.startDate) && date.isBefore(this.options.endDate);
         },
 
         getMonthsToShow: function() {
@@ -605,36 +558,6 @@ import './flight-date-picker.css';
                 this.render();
             }
         },
-        _getFormattedDate: function(date,format="YYYY-MM-DD") {
-            date = new Date(date);
-            const parts = new Intl.DateTimeFormat('en-US', {
-                timeZone: this.options.timezone,
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: format.includes('A') || format.includes('a')
-            }).formatToParts(date).reduce((acc, part) => {
-                acc[part.type] = part.value;
-                return acc;
-            }, {});
-            const replacements = {
-                'YYYY': parts.year,
-                'MM': parts.month,
-                'DD': parts.day,
-                'HH': parts.hour.padStart(2, '0'),
-                'hh': String((parseInt(parts.hour) % 12 || 12)).padStart(2, '0'),
-                'mm': parts.minute,
-                'ss': parts.second,
-                'A': parts.dayPeriod?.toUpperCase() || '',
-                'a': parts.dayPeriod?.toLowerCase() || ''
-            };
-            return format.replace(/YYYY|MM|DD|HH|hh|mm|ss|A|a/g, token => replacements[token]);
-        },
-        
-        
     };
     $.fn.flightDatePicker = function(options) {
         return this.each(function() {
