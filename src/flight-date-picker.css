@@ -4,6 +4,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
+    z-index: 99999;
     background: rgba(0, 0, 0, 0.25);
     z-index: 1000;
     display: flex;
@@ -79,18 +80,17 @@
     display: flex;
     gap: 0;
     justify-content: center;
-    margin: 0;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border-radius: 1rem;
     overflow: hidden;
-    padding: 0 20px;
+    margin: 0 20px 8px 20px;
+    background: #eeeeee;
+    position: relative;
 }
 
 .segment {
     flex: 1;
-    background: #f6f6f6;
-    border-radius: 16px 0 0 16px;
-    padding: 8px 0;
+    border-radius: 1rem 0 0 1rem;
+    padding: 12px 0 8px 0;
     text-align: center;
     border: 1px solid transparent;
     transition: border 0.2s, background 0.2s;
@@ -101,30 +101,37 @@
     justify-content: center;
     position: relative;
     cursor: pointer;
-    margin-bottom: 6px;
+    z-index: 1;
 }
 
 .segment + .segment {
-    border-radius: 0 16px 16px 0;
+    border-radius: 0 1rem 1rem 0;
 }
 
-.segment.active {
+.flight-date-picker-segments.flush .segment-slider{
+    content: ' ';
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    bottom: 6px;
+    right: 6px;
+    width: calc(50% - 6px);
     background: #fff;
-    border-color: #e0e0e0;
-    font-weight: 600;
-    z-index: 1;
+    border-radius: 0.85rem;
+    border: 1px solid #c2c2c2;
+    transition: transform 0.2s ease;
 }
-.segment:first-child.active{
-    box-shadow: 3px 0 6px rgba(0,0,0,0.1);
+
+.flight-date-picker-segments.flush .segment.start-segment.active ~ .segment-slider {
+    transform: translateX(0);
 }
-.segment:last-child.active{
-    box-shadow: -3px 0 6px rgba(0,0,0,0.1);
+.flight-date-picker-segments.flush .segment.end-segment.active ~ .segment-slider {
+    transform: translateX(100%);
 }
 
 .segment-label {
     font-size: 15px;
     color: #888;
-    margin-bottom: 2px;
     font-weight: 600;
 }
 
@@ -187,12 +194,6 @@
 .flight-date-picker-selectors {
     padding-top: 16px;
     background: #fff;
-}
-
-.flight-date-picker-segments {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
 }
 
 .flight-date-picker-body {
@@ -285,10 +286,10 @@
     border-radius: 0.75rem;
 }
 
-.flight-date-picker-day.today {
+/* .flight-date-picker-day.today {
     font-weight: 600;
     color: #007aff;
-}
+} */
 
 .flight-date-picker-day.selected {
     background: #007aff;

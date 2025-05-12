@@ -59,6 +59,7 @@ dayjs.extend(utc);
             this.activeSelector = null;
             this.popupOpen = false;
             this.boundDocumentClick = null;
+            this.boundEscKeyClose = null;
             this.boundResize = null;
             if (this.options.startDate || this.options.endDate) {
                 if (typeof this.options.onSelect === 'function') {
@@ -109,70 +110,76 @@ dayjs.extend(utc);
                 const date = dayjs.utc(dateStr);
                 self.selectDate(date);
             });
-            this.$calendar.on('click', '.flight-date-picker-apply', function() {
+            this.$calendar.find(".flight-date-picker-header").on('click', '.flight-date-picker-apply', function(e) {
                 self.apply(true);
             });
-            this.$calendar.on('click', '.flight-date-picker-clear', function() {
+            this.$calendar.find(".flight-date-picker-header").on('click', '.flight-date-picker-clear', function() {
                 self.clear();
             });
-            this.$calendar.on('click', '.flight-date-picker-cancel', function() {
+            this.$calendar.find(".flight-date-picker-header").on('click', '.flight-date-picker-cancel', function() {
                 self.close();
             });
-            this.$calendar.on('click', '.flight-date-picker-prev', function() {
+            this.$calendar.find(".flight-date-picker-body").on('click', '.flight-date-picker-prev', function() {
                 if ($(this).hasClass('disabled')) return;
                 self.moveMonth(-1);
             });
-            this.$calendar.on('click', '.flight-date-picker-next', function() {
+            this.$calendar.find(".flight-date-picker-body").on('click', '.flight-date-picker-next', function() {
                 if ($(this).hasClass('disabled')) return;
                 self.moveMonth(1);
             });
-            this.$calendar.on('click', '.segment-clear', function(e) {
+            this.$calendar.find(".flight-date-picker-selectors").on('click', '.segment-clear', function(e) {
                 e.stopPropagation();
                 const type = $(this).data('type');
                 if (type === 'start') {
                     self.options.startDate = null;
+                    self.options.endDate = null;
                 } else if (type === 'end') {
                     self.options.endDate = null;
                 }
                 self.activeSelector = type;
                 self.render();
+                self.apply();
             });
-            this.$calendar.on('click', '.segment', function() {
+            this.$calendar.find(".flight-date-picker-selectors").on('click', '.segment', function() {
                 if ($(this).hasClass('start-segment')) {
                     self.activeSelector = 'start';
                 } else if ($(this).hasClass('end-segment')) {
                     self.activeSelector = 'end';
                 }
-                self.render();
+                self._renderSelectorClasses();
             });
             this.boundDocumentClick = function(e) {
                 if (self.popupOpen) {
-                    // const $container = self.$calendar;
-                    // console.log(self.$container,self.$container.find(e.target),self.$container.find(e.target).length);
-                    // if (!$(e.target).closest('.flight-date-picker').length && !self.$element.is(e.target)) {
-                    //     self.close();
-                    // }
-                    // if (
-                    //     $container &&
-                    //     !$container.is(e.target) &&
-                    //     $container.find(e.target).length === 0 &&
-                    //     !self.$element.is(e.target)
-                    // ) {
-                    //     // self.close();
-                    // }
+                    const $container = self.$calendar.parent(), target = $(e.target), targetClassList = e.target.classList;
+                    let targetClass="";
+                    $.each(targetClassList,function(index,value){if(typeof value==="string" && value.length>0) targetClass += "."+value;});
+                    if($container.find(target).length===0&&$container.find(targetClass).length===0&&!self.$element.is(target)){
+                        self.close();
+                    }
                 }
             };
             $(document).on('click', this.boundDocumentClick);
+            this.boundEscKeyClose = function(e) {
+                if (self.popupOpen) {
+                    if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
+                        self.close();
+                    }
+                }
+            };
+            $(document).on('keyup', this.boundEscKeyClose);
             this.boundResize = function() { self.render(); };
             $(window).on('resize', this.boundResize);
+
         },
 
         unbindEvents: function() {
             if (this.$calendar) this.$calendar.off();
             if (this.boundDocumentClick) $(document).off('click', this.boundDocumentClick);
+            if (this.boundEscKeyClose) $(document).off('keyup', this.boundEscKeyClose);
             if (this.boundResize) $(window).off('resize', this.boundResize);
             this.boundDocumentClick = null;
             this.boundResize = null;
+            this.boundEscKeyClose = null;
         },
 
         moveMonth: function(delta) {
@@ -184,21 +191,15 @@ dayjs.extend(utc);
             if (this.options.maxDate && this.options.maxDate.diff(newMonth,'month') < this.getMonthsToShow()-1){
                 return;
             }
-            
-            const slideDirection = delta > 0 ? 'left' : 'right';
-            const monthsContainer = this.$body.find('.flight-date-picker-months');
-            
-            monthsContainer.addClass('sliding ' + slideDirection);
-            
             this.currentMonth = newMonth;
             this.renderMonthsOnly();
-            monthsContainer.removeClass('sliding left right');
         },
 
         render: function() {
             if (!this.$calendar) return;
             this.renderHeader();
             this.renderSelectors();
+            this._renderSelectorClasses();
             this.renderMonthsOnly();
             this.apply(false);
         },
@@ -261,8 +262,21 @@ dayjs.extend(utc);
                             <div class="segment-value">${ret}</div>
                         </div>${returnClear}
                     </div>
+                    <div class="segment-slider"></div>
                 </div>
             `);
+        },
+
+        _renderSelectorClasses: function(){
+            if (!this.activeSelector || this.activeSelector==="start") {
+                this.$calendar.find(".segment.start-segment").addClass("active");
+                this.$calendar.find(".segment.end-segment").removeClass("active");
+                this.activeSelector='start';
+            } else if (this.activeSelector==="end") {
+                this.activeSelector = 'end';
+                this.$calendar.find(".segment.start-segment").removeClass("active");
+                this.$calendar.find(".segment.end-segment").addClass("active");
+            }
         },
 
         renderMonthsOnly: function(slideDirection = null) {
@@ -303,7 +317,6 @@ dayjs.extend(utc);
                     monthArrayLength++;
                     rightMonthPad++;
                 }
-                console.log(this.options.maxDateMonth.diff(monthArrayStart,'month'))
             }else{
                 monthArrayLength++;
                 rightMonthPad++;
@@ -315,8 +328,6 @@ dayjs.extend(utc);
                 months.push(monthArrayStart.add(monthIndex,'month'));
             }
 
-            console.log(months,monthArrayStart.format('YYYY-MM-DD'),monthArrayLength,leftMonthPad,rightMonthPad,this.options.maxDateMonth.format('YYYY-MM-DD'));
-            
             let visibleStart = leftMonthPad;
             let visibleEnd = monthArrayLength - rightMonthPad;
 
@@ -469,10 +480,9 @@ dayjs.extend(utc);
 
         apply: function(autoClose=true) {
             if (this.options.startDate) {
-                const format = this.formatDate(this.options.startDate);
-                console.log("apply",format);
+                const format = this.options.startDate.format(this.options.format);
                 if (this.options.endDate) {
-                    this.$element.val(`${format} - ${this.formatDate(this.options.endDate)}`);
+                    this.$element.val(`${format} - ${this.options.endDate.format(this.options.format)}`);
                 } else {
                     this.$element.val(format);
                 }
@@ -487,15 +497,6 @@ dayjs.extend(utc);
                     this.close();
                 }
             }
-        },
-
-        formatDate: function(date) {
-            if (!(date instanceof Object) || isNaN(date)) return '';
-            return date.format(this.options.format);
-        },
-
-        isToday: function(date) {
-            return dayjs.utc(date).isSame(dayjs.utc(),'day');
         },
 
         isSelected: function(date) {
@@ -514,6 +515,7 @@ dayjs.extend(utc);
 
         isDisabled: function(date) {
             if (!(date instanceof Object) || isNaN(date)) return true;
+            if (!this.options.singleDate && this.options.startDate && date.isBefore(this.options.startDate)) return true;
             if (this.options.minDate && date.isBefore(this.options.minDate)) return true;
             if (this.options.maxDate && date.isAfter(this.options.maxDate)) return true;
         },
@@ -521,8 +523,7 @@ dayjs.extend(utc);
         isInRange: function(date) {
             if (!this.options.startDate || !this.options.endDate) return false;
             else{
-                console.log(date.startOf('day').subtract(1,'minute').format('YYYY-MM-DD HH:mm:ss'),this.options.startDate.startOf('day').format('YYYY-MM-DD HH:mm:ss'),this.options.endDate.startOf('day').format('YYYY-MM-DD HH:mm:ss'),date.startOf('day').subtract(1,'minute').diff(this.options.startDate.startOf('day'),'day'),date.startOf('day').subtract(1,'minute').diff(this.options.endDate.startOf('day'),'day'),date.startOf('day').subtract(1,'minute').diff(this.options.startDate.startOf('day'),'day') > 0 && date.startOf('day').subtract(1,'minute').diff(this.options.endDate.startOf('day'),'day') < 0);
-                return date.startOf('day').subtract(1,'minute').diff(this.options.startDate.startOf('day'),'day') > 0 && date.startOf('day').subtract(1,'minute').diff(this.options.endDate.startOf('day'),'day') < 0;
+                return date.startOf('day').diff(this.options.startDate.startOf('day'),'day') > 0 && date.startOf('day').diff(this.options.endDate.endOf('day'),'day') < 0;
             }
         },
 
