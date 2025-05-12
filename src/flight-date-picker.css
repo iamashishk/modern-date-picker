@@ -286,11 +286,6 @@
     border-radius: 0.75rem;
 }
 
-/* .flight-date-picker-day.today {
-    font-weight: 600;
-    color: #007aff;
-} */
-
 .flight-date-picker-day.selected {
     background: #007aff;
     color: #fff;
@@ -302,6 +297,9 @@
 }
 .flight-date-picker-day.selected.end-date {
     border-radius: 0 0.75rem 0.75rem 0;
+}
+.flight-date-picker-day.selected.start-date.end-date {
+    border-radius: 0.75rem;
 }
 
 .flight-date-picker-day.selected:hover {
@@ -501,11 +499,12 @@
 /* Responsive improvements */
 @media (max-width: 576px) {
     .flight-date-picker {
-        min-width: 100%;
+        min-width: 95vw;
         border-radius: 0;
-        height: 100vh;
+        /* height: 100vh; */
         display: flex;
         flex-direction: column;
+        border-radius: 16px;
     }
 
     .flight-date-picker-header {

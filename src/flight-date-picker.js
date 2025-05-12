@@ -77,6 +77,8 @@ dayjs.extend(utc);
             if (typeof this.options.onInit === 'function') {
                 this.options.onInit.call(this, this.options);
             }
+            this.$element.attr("readonly","readonly");
+            console.log(this.element);
         },
         buildCalendar: function() {
             this.$calendar = $('<div class="flight-date-picker"></div>');
@@ -515,7 +517,7 @@ dayjs.extend(utc);
 
         isDisabled: function(date) {
             if (!(date instanceof Object) || isNaN(date)) return true;
-            if (!this.options.singleDate && this.options.startDate && date.isBefore(this.options.startDate)) return true;
+            if (!this.options.singleDate && this.options.startDate && !this.options.endDate && date.isBefore(this.options.startDate)) return true;
             if (this.options.minDate && date.isBefore(this.options.minDate)) return true;
             if (this.options.maxDate && date.isAfter(this.options.maxDate)) return true;
         },
