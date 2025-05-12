@@ -294,18 +294,17 @@ dayjs.extend(utc);
 
             if(this.options.maxDateMonth){
                 if(monthArrayStart.add(monthsToShow+1,'month').diff(this.options.maxDateMonth,'month') <= 0){
-                    console.log("A1");
                     monthArrayLength++;
                     rightMonthPad++;
                 }else if(this.options.maxDateMonth.diff(monthArrayStart,'month')+1 <= monthArrayLength){
-                    console.log("A2");
                     monthArrayLength = this.options.maxDateMonth.diff(monthArrayStart,'month')+1;
                     rightMonthPad = 0;
                 }else{
-                    console.log("A3",this.options.maxDateMonth.diff(monthArrayStart,'month'));
+                    monthArrayLength++;
+                    rightMonthPad++;
                 }
+                console.log(this.options.maxDateMonth.diff(monthArrayStart,'month'))
             }else{
-                console.log("A4");
                 monthArrayLength++;
                 rightMonthPad++;
             }
@@ -316,7 +315,7 @@ dayjs.extend(utc);
                 months.push(monthArrayStart.add(monthIndex,'month'));
             }
 
-            console.log(months,monthArrayStart.format('YYYY-MM-DD'),monthArrayLength,leftMonthPad,rightMonthPad);
+            console.log(months,monthArrayStart.format('YYYY-MM-DD'),monthArrayLength,leftMonthPad,rightMonthPad,this.options.maxDateMonth.format('YYYY-MM-DD'));
             
             let visibleStart = leftMonthPad;
             let visibleEnd = monthArrayLength - rightMonthPad;
@@ -360,7 +359,7 @@ dayjs.extend(utc);
                     const dateType = this.selectedDateType(date);
                     const isSelected = this.isSelected(date);
                     html += `
-                        <div class="flight-date-picker-day ${typeof dateType==="string"?dateType+'-date':''}  ${isSelected ? 'selected' : ''} ${isInRange ? 'in-range' : ''} ${isDisabled ? 'disabled' : ''}" data-date="${date.format('YYYY-MM-DD\THH:mm:ss')}">${d}</div>
+                        <div class="flight-date-picker-day ${typeof dateType==="string"?dateType+'-date ':''}  ${isSelected ? 'selected ' : ''} ${isInRange ? 'in-range ' : ''} ${isDisabled ? 'disabled ' : ''}" data-date="${date.format('YYYY-MM-DD\THH:mm:ss')}">${d}</div>
                     `;
                 }
                 html += '</div></div>';
@@ -501,35 +500,16 @@ dayjs.extend(utc);
 
         isSelected: function(date) {
             if (!this.options.startDate || !(date instanceof Object) || isNaN(date)) return false;
-
-            const normalizedDate = date.clone().startOf('day');
-            
-            if (this.options.singleDate) {
-                return this.options.startDate && normalizedDate.isSame(dayjs.utc(this.options.startDate).startOf('day'),'day');
-            }
-
-            if (this.options.startDate && (this.activeSelector === null || this.activeSelector === 'start')) {
-                return normalizedDate.isSame(dayjs.utc(this.options.startDate).startOf('day'),'day');
-            }
-
-            if (this.options.endDate && this.activeSelector === 'end') {
-                return normalizedDate.isSame(dayjs.utc(this.options.endDate).startOf('day'),'day');
-            }
-
-            return false;
+            return (this.options.startDate && date.format('YYYY-MM-DD') === this.options.startDate.format('YYYY-MM-DD')) || (this.options.endDate && date.format('YYYY-MM-DD') === this.options.endDate.format('YYYY-MM-DD'));
         },
 
         selectedDateType: function(date) {
-            if (!this.options.startDate || !(date instanceof Date) || isNaN(date)) return false;
+            if (!this.options.startDate || !(date instanceof Object) || isNaN(date)) return false;
             if (this.options.singleDate) {
                 return 'single';
             }
-            if (!this.options.endDate) {
-                return date.getTime() === this.options.startDate.getTime() ? 'start' : false;
-            }
-            if (!(this.options.endDate instanceof Date) || isNaN(this.options.endDate)) return false;
-            if (date.getTime() === this.options.startDate.getTime()) return 'start';
-            if (date.getTime() === this.options.endDate.getTime()) return 'end';
+            if (this.options.startDate && date.format('YYYY-MM-DD') === this.options.startDate.format('YYYY-MM-DD')) return 'start';
+            if (this.options.endDate && date.format('YYYY-MM-DD') === this.options.endDate.format('YYYY-MM-DD')) return 'end';
         },
 
         isDisabled: function(date) {
@@ -540,7 +520,10 @@ dayjs.extend(utc);
 
         isInRange: function(date) {
             if (!this.options.startDate || !this.options.endDate) return false;
-            else return date.isAfter(this.options.startDate) && date.isBefore(this.options.endDate);
+            else{
+                console.log(date.startOf('day').subtract(1,'minute').format('YYYY-MM-DD HH:mm:ss'),this.options.startDate.startOf('day').format('YYYY-MM-DD HH:mm:ss'),this.options.endDate.startOf('day').format('YYYY-MM-DD HH:mm:ss'),date.startOf('day').subtract(1,'minute').diff(this.options.startDate.startOf('day'),'day'),date.startOf('day').subtract(1,'minute').diff(this.options.endDate.startOf('day'),'day'),date.startOf('day').subtract(1,'minute').diff(this.options.startDate.startOf('day'),'day') > 0 && date.startOf('day').subtract(1,'minute').diff(this.options.endDate.startOf('day'),'day') < 0);
+                return date.startOf('day').subtract(1,'minute').diff(this.options.startDate.startOf('day'),'day') > 0 && date.startOf('day').subtract(1,'minute').diff(this.options.endDate.startOf('day'),'day') < 0;
+            }
         },
 
         getMonthsToShow: function() {
