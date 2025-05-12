@@ -77,7 +77,7 @@ dayjs.extend(utc);
             if (typeof this.options.onInit === 'function') {
                 this.options.onInit.call(this, this.options);
             }
-            this.$element.attr("readonly","readonly");
+            this.$element.attr("readonly","readonly").addClass('flight-date-picker-element');
             console.log(this.element);
         },
         buildCalendar: function() {
@@ -344,6 +344,7 @@ dayjs.extend(utc);
                 const month = months[i];
                 const daysInMonth = month.daysInMonth();
                 const firstDay = month.startOf('month').day();
+                const lastDay = month.endOf('month').day();
                 
                 const isVisible = i >= visibleStart && i < visibleEnd;
 
@@ -374,6 +375,9 @@ dayjs.extend(utc);
                     html += `
                         <div class="flight-date-picker-day ${typeof dateType==="string"?dateType+'-date ':''}  ${isSelected ? 'selected ' : ''} ${isInRange ? 'in-range ' : ''} ${isDisabled ? 'disabled ' : ''}" data-date="${date.format('YYYY-MM-DD\THH:mm:ss')}">${d}</div>
                     `;
+                }
+                for(let d=lastDay+1;d<=6;d++){
+                    html += '<div class="flight-date-picker-day empty"></div>';
                 }
                 html += '</div></div>';
             }
