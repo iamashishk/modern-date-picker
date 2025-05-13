@@ -185,64 +185,17 @@
             $('#basic-single').modernDatePicker({
                 singleDate: true,
                 autoApply: true,
-                format: 'YYYY-MM-DD'
+                format: 'YYYY-MM-DD',
+                minDate: 0,
             });
-
-            $('#basic-range').modernDatePicker({
+            $('#basic-single').modernDatePicker({
                 singleDate: false,
                 autoApply: true,
-                format: 'YYYY-MM-DD'
-            });
-
-            // Advanced Features
-            $('#time-picker').modernDatePicker({
-                showTimePicker: true,
-                timeFormat: 'HH:mm',
-                timeStep: 30,
-                format: 'YYYY-MM-DD HH:mm'
-            });
-
-            $('#custom-format').modernDatePicker({
-                format: 'DD/MM/YYYY',
-                popupDateFormat: 'DD MMMM YYYY'
-            });
-
-            // Constraints
-            const today = new Date();
-            const nextWeek = new Date(today);
-            nextWeek.setDate(today.getDate() + 7);
-
-            $('#min-max').modernDatePicker({
-                minDate: today,
-                maxDate: nextWeek,
-                format: 'YYYY-MM-DD'
-            });
-
-            // Disable weekends
-            const disabledDates = [];
-            for (let i = 0; i < 30; i++) {
-                const date = new Date();
-                date.setDate(date.getDate() + i);
-                if (date.getDay() === 0 || date.getDay() === 6) {
-                    disabledDates.push(date);
+                format: 'YYYY-MM-DD',
+                minDate: 0,
+                onInit: function(options) {
+                    console.log(options.minDate, options.maxDate);
                 }
-            }
-
-            $('#disabled-dates').modernDatePicker({
-                disabledDates: disabledDates,
-                format: 'YYYY-MM-DD'
-            });
-
-            // Localization
-            $('#localized').modernDatePicker({
-                locale: 'fr',
-                format: 'DD/MM/YYYY'
-            });
-
-            $('#custom-labels').modernDatePicker({
-                startLabel: 'Check-in',
-                endLabel: 'Check-out',
-                format: 'YYYY-MM-DD'
             });
         });
     </script>
