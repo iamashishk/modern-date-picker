@@ -1,8 +1,8 @@
 {
-  "name": "flight-date-picker",
+  "name": "modern-date-picker",
   "version": "1.0.0",
-  "description": "A jQuery-based flight date range picker",
-  "main": "dist/flight-date-picker.js",
+  "description": "A jQuery-based modern date range picker. Can be used as a flight date picker, or as a single date picker.",
+  "main": "dist/modern-date-picker.min.js",
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack --mode development --watch"
@@ -19,5 +19,8 @@
   },
   "peerDependencies": {
     "jquery": ">=3.0.0"
-  }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

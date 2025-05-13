@@ -552,4 +552,7 @@ input.flight-date-picker-element{
     .segment-date{
         font-size: 12px;
     }
+    .segment {
+        padding: 12px 0;
+    }
 } 

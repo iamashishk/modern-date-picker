@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Date Picker - Configuration Demos</title>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="../dist/flight-date-picker.js?v=0.88"></script>
+    <title>Modern Date Picker - Feature Demos</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="../dist/modern-date-picker.min.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -102,53 +102,149 @@
             font-size: 13px;
             min-height: 20px;
         }
+
+        .feature-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle">Toggle Dark Theme</button>
-    <h1>Flight Date Picker Configuration Demos</h1>
-
+    <h1>Modern Date Picker Feature Demos</h1>
+    
     <div class="demo-container">
         <!-- Basic Usage -->
         <div class="demo-section">
-            <h2>Basic Usage (v0.88)</h2>
+            <h2>Basic Usage</h2>
+            <div class="feature-tag">Single Date</div>
+            <div class="feature-tag">Range Selection</div>
             <div class="input-group">
-                <label for="basic">Default Configuration:</label>
-                <input type="text" id="basic" placeholder="Click to select dates">
+                <label for="basic-single">Single Date:</label>
+                <input type="text" id="basic-single" placeholder="Select a date">
+            </div>
+            <div class="input-group">
+                <label for="basic-range">Date Range:</label>
+                <input type="text" id="basic-range" placeholder="Select date range">
+            </div>
+        </div>
+
+        <!-- Advanced Features -->
+        <div class="demo-section">
+            <h2>Advanced Features</h2>
+            <div class="feature-tag">Time Picker</div>
+            <div class="feature-tag">Custom Format</div>
+            <div class="input-group">
+                <label for="time-picker">With Time Selection:</label>
+                <input type="text" id="time-picker" placeholder="Select date and time">
+            </div>
+            <div class="input-group">
+                <label for="custom-format">Custom Date Format:</label>
+                <input type="text" id="custom-format" placeholder="Select date (DD/MM/YYYY)">
+            </div>
+        </div>
+
+        <!-- Constraints -->
+        <div class="demo-section">
+            <h2>Date Constraints</h2>
+            <div class="feature-tag">Min/Max Dates</div>
+            <div class="feature-tag">Disabled Dates</div>
+            <div class="input-group">
+                <label for="min-max">Min/Max Date Range:</label>
+                <input type="text" id="min-max" placeholder="Select date (next 7 days only)">
+            </div>
+            <div class="input-group">
+                <label for="disabled-dates">With Disabled Dates:</label>
+                <input type="text" id="disabled-dates" placeholder="Select date (weekends disabled)">
+            </div>
+        </div>
+
+        <!-- Localization -->
+        <div class="demo-section">
+            <h2>Localization</h2>
+            <div class="feature-tag">Multiple Languages</div>
+            <div class="feature-tag">Custom Labels</div>
+            <div class="input-group">
+                <label for="localized">Localized Picker:</label>
+                <input type="text" id="localized" placeholder="Select date (French)">
+            </div>
+            <div class="input-group">
+                <label for="custom-labels">Custom Labels:</label>
+                <input type="text" id="custom-labels" placeholder="Select dates (Check-in/Check-out)">
             </div>
         </div>
     </div>
 
     <script>
-        let datetimepicker;
-        $(document).ready(function() {
-            
-            try {
-                $('#basic').flightDatePicker({
-                    autoApply: true,
-                    // startDate: "2025-06-11 00:00:00",
-                    // endDate: "2025-06-18 00:00:00",
-                    minDate: 0,
-                    maxDate: 120,
-                    startLabel: 'Departure',
-                    endLabel: 'Return',
-                    popupDateFormat: "MMM DD, YYYY",
-                    // timezone: "America/New_York",
-                    // singleDate: true,
-                    onChange: function(startDate, endDate) {
-                        // console.log("start", startDate);
-                        // console.log("end", endDate);
-                    },
-                    onInit: function(options) {
-                        console.log(options.minDate.format('YYYY-MM-DD'));
-                        console.log(options.minDateMonth.format('YYYY-MM-DD'));
-                        console.log(options.maxDate.format('YYYY-MM-DD'));
-                        console.log(options.maxDateMonth.format('YYYY-MM-DD'));
-                    }
-                });
-            } catch (error) {
-                console.error('Error initializing date pickers:', error);
+        // Initialize all date pickers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Basic Usage
+            new ModernDatePicker('#basic-single', {
+                singleDate: true,
+                autoApply: true,
+                format: 'YYYY-MM-DD'
+            });
+
+            new ModernDatePicker('#basic-range', {
+                singleDate: false,
+                autoApply: true,
+                format: 'YYYY-MM-DD'
+            });
+
+            // Advanced Features
+            new ModernDatePicker('#time-picker', {
+                showTimePicker: true,
+                timeFormat: 'HH:mm',
+                timeStep: 30,
+                format: 'YYYY-MM-DD HH:mm'
+            });
+
+            new ModernDatePicker('#custom-format', {
+                format: 'DD/MM/YYYY',
+                popupDateFormat: 'DD MMMM YYYY'
+            });
+
+            // Constraints
+            const today = new Date();
+            const nextWeek = new Date(today);
+            nextWeek.setDate(today.getDate() + 7);
+
+            new ModernDatePicker('#min-max', {
+                minDate: today,
+                maxDate: nextWeek,
+                format: 'YYYY-MM-DD'
+            });
+
+            // Disable weekends
+            const disabledDates = [];
+            for (let i = 0; i < 30; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+                if (date.getDay() === 0 || date.getDay() === 6) {
+                    disabledDates.push(date);
+                }
             }
+
+            new ModernDatePicker('#disabled-dates', {
+                disabledDates: disabledDates,
+                format: 'YYYY-MM-DD'
+            });
+
+            // Localization
+            new ModernDatePicker('#localized', {
+                locale: 'fr',
+                format: 'DD/MM/YYYY'
+            });
+
+            new ModernDatePicker('#custom-labels', {
+                startLabel: 'Check-in',
+                endLabel: 'Check-out',
+                format: 'YYYY-MM-DD'
+            });
         });
     </script>
 </body>
