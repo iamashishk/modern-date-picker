@@ -115,7 +115,7 @@
     </style>
 </head>
 <body>
-    <h1>Modern Date Picker Feature Demos</h1>
+    <h1>Modern Date Picker Feature Demos (v1.0.0)</h1>
     
     <div class="demo-container">
         <!-- Basic Usage -->
@@ -180,30 +180,29 @@
     </div>
 
     <script>
-        // Initialize all date pickers
-        document.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
             // Basic Usage
-            new ModernDatePicker('#basic-single', {
+            $('#basic-single').modernDatePicker({
                 singleDate: true,
                 autoApply: true,
                 format: 'YYYY-MM-DD'
             });
 
-            new ModernDatePicker('#basic-range', {
+            $('#basic-range').modernDatePicker({
                 singleDate: false,
                 autoApply: true,
                 format: 'YYYY-MM-DD'
             });
 
             // Advanced Features
-            new ModernDatePicker('#time-picker', {
+            $('#time-picker').modernDatePicker({
                 showTimePicker: true,
                 timeFormat: 'HH:mm',
                 timeStep: 30,
                 format: 'YYYY-MM-DD HH:mm'
             });
 
-            new ModernDatePicker('#custom-format', {
+            $('#custom-format').modernDatePicker({
                 format: 'DD/MM/YYYY',
                 popupDateFormat: 'DD MMMM YYYY'
             });
@@ -213,7 +212,7 @@
             const nextWeek = new Date(today);
             nextWeek.setDate(today.getDate() + 7);
 
-            new ModernDatePicker('#min-max', {
+            $('#min-max').modernDatePicker({
                 minDate: today,
                 maxDate: nextWeek,
                 format: 'YYYY-MM-DD'
@@ -229,18 +228,18 @@
                 }
             }
 
-            new ModernDatePicker('#disabled-dates', {
+            $('#disabled-dates').modernDatePicker({
                 disabledDates: disabledDates,
                 format: 'YYYY-MM-DD'
             });
 
             // Localization
-            new ModernDatePicker('#localized', {
+            $('#localized').modernDatePicker({
                 locale: 'fr',
                 format: 'DD/MM/YYYY'
             });
 
-            new ModernDatePicker('#custom-labels', {
+            $('#custom-labels').modernDatePicker({
                 startLabel: 'Check-in',
                 endLabel: 'Check-out',
                 format: 'YYYY-MM-DD'
