@@ -259,13 +259,17 @@ dayjs.extend(timezone);
                 let monthArrayStart = this.currentMonth;
                 if(!monthArrayStart){
                     if(this.options.startDate){
-                        monthArrayStart = dayjs.utc(this.options.startDate).tz(this.options.timezone).startOf('month');
+                        console.log("A");
+                        monthArrayStart = dayjs(this.options.startDate).startOf('month');
                     }else if(this.options.minDateMonth){
-                        monthArrayStart = dayjs.utc(this.options.minDateMonth).tz(this.options.timezone).startOf('month');
+                        console.log("B");
+                        monthArrayStart = dayjs(this.options.minDateMonth).startOf('month');
                     }else{
+                        console.log("C")
                         monthArrayStart = dayjs.utc().tz(this.options.timezone).startOf('month');
                     }
                 }
+                console.log(monthArrayStart);
 
                 if(this.options.minDateMonth){
                     if(monthArrayStart.subtract(1,'month').diff(this.options.minDateMonth,'month') >= 0){
@@ -535,6 +539,7 @@ dayjs.extend(timezone);
         if(options.minDate!==null){
             options.minDate = dayjs.utc().tz(options.timezone).add(options.minDate,'days').startOf('day');
             options['minDateMonth'] = options.minDate.clone().startOf('month');
+            console.log(options.minDate,options.minDateMonth);
         }
         if(options.maxDate){
             options.maxDate = dayjs.utc().tz(options.timezone).add(options.maxDate,'days').endOf('day');
