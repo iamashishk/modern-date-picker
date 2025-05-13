@@ -261,7 +261,7 @@ input.flight-date-picker-element{
 .flight-date-picker-weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .flight-date-picker-weekday {
@@ -273,7 +273,6 @@ input.flight-date-picker-element{
 .flight-date-picker-days {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    margin-bottom: 4px;
     row-gap: 8px;
 }
 
