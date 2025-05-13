@@ -109,17 +109,19 @@ dayjs.extend(timezone);
                     }
                     privateMethods.renderSelectorClasses.call(self);
                 });
-                this.boundDocumentClick = function(e) {
-                    if (self.popupOpen) {
-                        const $container = self.$calendar.parent(), target = $(e.target), targetClassList = e.target.classList;
-                        let targetClass="";
-                        $.each(targetClassList,function(index,value){if(typeof value==="string" && value.length>0) targetClass += "."+value;});
-                        if($container.find(target).length===0&&$container.find(targetClass).length===0&&!self.$element.is(target)&&!targetClass.includes(".flight-date-picker-day")){
-                            self.close();
+                if(self.options.closeOnOutsideClick){
+                    this.boundDocumentClick = function(e) {
+                        if (self.popupOpen) {
+                            const $container = self.$calendar.parent(), target = $(e.target), targetClassList = e.target.classList;
+                            let targetClass="";
+                            $.each(targetClassList,function(index,value){if(typeof value==="string" && value.length>0) targetClass += "."+value;});
+                            if($container.find(target).length===0&&$container.find(targetClass).length===0&&!self.$element.is(target)&&!targetClass.includes(".flight-date-picker-day")){
+                                self.close();
+                            }
                         }
-                    }
-                };
-                $(document).on('click', this.boundDocumentClick);
+                    };
+                    $(document).on('click', this.boundDocumentClick);
+                }
                 if(self.options.closeOnEscape){
                     this.boundEscKeyClose = function(e) {
                         if (self.popupOpen) {
@@ -554,6 +556,7 @@ dayjs.extend(timezone);
         showClose: true,
         showApply: true,
         closeOnEscape: false,
+        closeOnOutsideClick: true,
         singleDate: false,
         onChange: null,
         onSelect: null,
