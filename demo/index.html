@@ -132,51 +132,6 @@
                 <input type="text" id="basic-range" placeholder="Select date range">
             </div>
         </div>
-
-        <!-- Advanced Features -->
-        <div class="demo-section">
-            <h2>Advanced Features</h2>
-            <div class="feature-tag">Time Picker</div>
-            <div class="feature-tag">Custom Format</div>
-            <div class="input-group">
-                <label for="time-picker">With Time Selection:</label>
-                <input type="text" id="time-picker" placeholder="Select date and time">
-            </div>
-            <div class="input-group">
-                <label for="custom-format">Custom Date Format:</label>
-                <input type="text" id="custom-format" placeholder="Select date (DD/MM/YYYY)">
-            </div>
-        </div>
-
-        <!-- Constraints -->
-        <div class="demo-section">
-            <h2>Date Constraints</h2>
-            <div class="feature-tag">Min/Max Dates</div>
-            <div class="feature-tag">Disabled Dates</div>
-            <div class="input-group">
-                <label for="min-max">Min/Max Date Range:</label>
-                <input type="text" id="min-max" placeholder="Select date (next 7 days only)">
-            </div>
-            <div class="input-group">
-                <label for="disabled-dates">With Disabled Dates:</label>
-                <input type="text" id="disabled-dates" placeholder="Select date (weekends disabled)">
-            </div>
-        </div>
-
-        <!-- Localization -->
-        <div class="demo-section">
-            <h2>Localization</h2>
-            <div class="feature-tag">Multiple Languages</div>
-            <div class="feature-tag">Custom Labels</div>
-            <div class="input-group">
-                <label for="localized">Localized Picker:</label>
-                <input type="text" id="localized" placeholder="Select date (French)">
-            </div>
-            <div class="input-group">
-                <label for="custom-labels">Custom Labels:</label>
-                <input type="text" id="custom-labels" placeholder="Select dates (Check-in/Check-out)">
-            </div>
-        </div>
     </div>
 
     <script>
@@ -188,14 +143,15 @@
                 format: 'YYYY-MM-DD',
                 minDate: 0,
             });
-            $('#basic-single').modernDatePicker({
+            $('#basic-range').modernDatePicker({
                 singleDate: false,
                 autoApply: true,
                 format: 'YYYY-MM-DD',
+                popupFormat: 'MMM D, YYYY',
                 minDate: 0,
-                onInit: function(options) {
-                    console.log(options.minDate, options.maxDate);
-                }
+                endDate: 360,
+                startLabel: 'Departure',
+                endLabel: 'Return',
             });
         });
     </script>
