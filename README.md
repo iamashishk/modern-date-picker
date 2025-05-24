@@ -105,6 +105,9 @@ datePicker.clear();
 // Switch between single date and range
 datePicker.switchDateType('single'); // or 'range'
 
+// Change default date segment on calendar open
+datePicker.switchActiveDateSelector('start'); // or 'end'
+
 ```
 
 ## Browser Support
