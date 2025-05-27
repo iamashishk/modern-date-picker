@@ -120,7 +120,9 @@ dayjs.extend(timezone);
                             }
                         }
                     };
-                    $(document).on('click', this.boundDocumentClick);
+                    setTimeout(() => {
+                        $(document).on('click', this.boundDocumentClick);
+                    }, 30);
                 }
                 if(self.options.closeOnEscape){
                     this.boundEscKeyClose = function(e) {
@@ -130,7 +132,9 @@ dayjs.extend(timezone);
                             }
                         }
                     };
-                    $(document).on('keyup', this.boundEscKeyClose);
+                    setTimeout(() => {
+                        $(document).on('keyup', this.boundEscKeyClose);
+                    }, 30);
                 }
                 this.boundResize = function() { privateMethods.render.call(self); };
                 $(window).on('resize', this.boundResize);
@@ -307,7 +311,7 @@ dayjs.extend(timezone);
                 const nextDisabled = rightMonthPad === 0;
                 
                 let html = `
-                    <div class="flight-date-picker-prev${prevDisabled ? ' disabled' : ''}" aria-disabled="${prevDisabled}">&#8592;</div>
+                    <div class="flight-date-picker-prev${prevDisabled ? ' disabled' : ''}" aria-disabled="${prevDisabled}"><span class="flight-date-picker-prev-icon">&#8592;</span></div>
                     <div class="flight-date-picker-months${slideDirection ? ' sliding ' + slideDirection : ''}">`;
                 
                 for (let i = 0; i < months.length; i++) {
@@ -352,7 +356,7 @@ dayjs.extend(timezone);
                     html += '</div></div>';
                 }
                 html += `</div>
-                    <div class="flight-date-picker-next${nextDisabled ? ' disabled' : ''}" aria-disabled="${nextDisabled}">&#8594;</div>`;
+                    <div class="flight-date-picker-next${nextDisabled ? ' disabled' : ''}" aria-disabled="${nextDisabled}"><span class="flight-date-picker-next-icon">&#8594;</span></div>`;
                 
                 this.$body.html(html);
                 

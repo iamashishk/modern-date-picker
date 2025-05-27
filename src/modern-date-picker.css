@@ -411,6 +411,11 @@ input.flight-date-picker-element{
     right: 0;
 }
 
+.flight-date-picker-next-icon, .flight-date-picker-prev-icon{
+    font-size: 18px;
+    margin-top: -4px;
+}
+
 .flight-date-picker-prev:hover, .flight-date-picker-next:hover {
     background: #e6f0ff;
 }
