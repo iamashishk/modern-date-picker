@@ -533,19 +533,37 @@ dayjs.extend(timezone);
         this.$element = $(element);
         this.options = $.extend({}, modernDatePicker.defaults, options);
         dayjs.tz.setDefault(options.timezone);
-        if(options.startDate){
-            options.startDate = dayjs.utc(options.startDate).tz(options.timezone).startOf('day');
-        }
-        if(options.endDate){
-            options.endDate = dayjs.utc(options.endDate).tz(options.timezone).endOf('day');
-        }
         if(options.minDate!==null){
-            options.minDate = dayjs.utc().tz(options.timezone).add(options.minDate,'days').startOf('day');
+            if(isNaN(options.minDate)){
+                options.minDate = dayjs.tz(options.minDate,options.timezone).startOf('day');
+            }else{
+                options.minDate = dayjs.utc().tz(options.timezone).add(options.minDate,'days').startOf('day');
+            }
             options['minDateMonth'] = options.minDate.clone().startOf('month');
         }
         if(options.maxDate){
-            options.maxDate = dayjs.utc().tz(options.timezone).add(options.maxDate,'days').endOf('day');
+            if(isNaN(options.maxDate)){
+                options.maxDate = dayjs.tz(options.maxDate,options.timezone).endOf('day');
+            }else{
+                if(options.minDate){
+                    options.maxDate = dayjs.tz(options.minDate,options.timezone).add(options.maxDate,'days').endOf('day');
+                }else{
+                    options.maxDate = dayjs.utc().tz(options.timezone).add(options.maxDate,'days').endOf('day');
+                }
+            }
             options['maxDateMonth'] = options.maxDate.clone().startOf('month');
+        }
+        if(options.startDate){
+            options.startDate = dayjs.tz(options.startDate,options.timezone).startOf('day');
+            if(options.minDate && options.startDate.isBefore(options.minDate)){
+                options.startDate = null;
+            }
+        }
+        if(options.endDate){
+            options.endDate = dayjs.tz(options.endDate,options.timezone).endOf('day');
+            if(options.maxDate && options.endDate.isAfter(options.maxDate)){
+                options.endDate = null;
+            }
         }
         this.options = $.extend({}, modernDatePicker.defaults, options);
         privateMethods.init.call(this);
