@@ -58,7 +58,7 @@ input.flight-date-picker-element{
 .flight-date-picker-clear, .flight-date-picker-cancel, .flight-date-picker-apply {
     background: none;
     border: none;
-    color: #007aff;
+    color: var(--mdp-default-color,#007aff);
     font-size: 16px;
     font-weight: 600;
     padding: 0 8px;
@@ -253,7 +253,7 @@ input.flight-date-picker-element{
     gap: 8px;
     font-size: 16px;
     font-weight: 500;
-    color: #007aff;
+    color: var(--mdp-default-color,#007aff);
     margin: 6px 0 16px 0;
     position: relative;
 }
@@ -289,7 +289,7 @@ input.flight-date-picker-element{
 }
 
 .flight-date-picker-day.selected {
-    background: #007aff;
+    background: var(--mdp-default-color,#007aff);
     color: #fff;
     animation: selectPulse 0.18s cubic-bezier(.4,0,.2,1);
 }
@@ -320,7 +320,7 @@ input.flight-date-picker-element{
 }
 
 .flight-date-picker-day:hover:not(.empty):not(.disabled) {
-    background: #007aff;
+    background: var(--mdp-default-color,#007aff);
     color: #fff;
 }
 
@@ -381,14 +381,14 @@ input.flight-date-picker-element{
 }
 
 .flight-date-picker-day.in-range {
-    background: #e6f0ff;
-    color: #007aff;
+    background: var(--mdp-subtle-color,#e6f0ff);
+    color: var(--mdp-default-color,#007aff);
     border-radius: 0;
 }
 
 .flight-date-picker-prev, .flight-date-picker-next {
     cursor: pointer;
-    color: #007aff;
+    color: var(--mdp-default-color,#007aff);
     font-size: 20px;
     user-select: none;
     border-radius: 50%;
@@ -417,7 +417,7 @@ input.flight-date-picker-element{
 }
 
 .flight-date-picker-prev:hover, .flight-date-picker-next:hover {
-    background: #e6f0ff;
+    background: var(--mdp-subtle-color,#e6f0ff);
 }
 
 .flight-date-picker-prev.disabled, .flight-date-picker-next.disabled {
