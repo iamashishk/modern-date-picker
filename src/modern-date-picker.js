@@ -48,10 +48,10 @@ dayjs.extend(timezone);
                 this.$calendar.append(this.$header, this.$selectors, this.$body);
                 this.$container = $('<div class="flight-date-picker-container"></div>');
                 this.$container.append(this.$calendar);
-                if(this.options.theme.defaultColor){
+                if(this.options?.theme?.defaultColor){
                     this.$container.css('--mdp-default-color', this.options.theme.defaultColor);
                 }
-                if(this.options.theme.subtleColor){
+                if(this.options?.theme?.subtleColor){
                     this.$container.css('--mdp-subtle-color', this.options.theme.subtleColor);
                 }
                 $('body').append(this.$container);
