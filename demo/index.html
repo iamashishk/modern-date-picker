@@ -124,20 +124,22 @@
             <div class="feature-tag">Single Date</div>
             <div class="input-group">
                 <label for="basic-range">Date Range:</label>
+                <input type="text" id="focusChk" placeholder="any other element for focus check">
                 <input type="text" id="basic-range" placeholder="Select date range">
             </div>
         </div>
     </div>
 
     <script>
+        let datePicker;
         $(document).ready(function() {
-            $('#basic-range').modernDatePicker({
+            datePicker = $('#basic-range').modernDatePicker({
                 singleDate: false,
                 autoApply: true,
                 format: 'YYYY-MM-DD',
                 popupFormat: 'MMM D, YYYY',
                 minDate: -3,
-                maxDate: 66,
+                maxDate: 3645,
                 theme:{
                     defaultColor: '#2C1B13',
                     subtleColor: '#2C1B1340'
@@ -149,6 +151,11 @@
                 timezone: 'America/New_York',
                 closeOnOutsideClick: true,
                 closeOnEscape: true,
+            });
+
+            $('#basic-range').on('focus', function () {
+                datePicker.switchActiveDateSelector('start');
+                datePicker.open();
             });
         });
     </script>

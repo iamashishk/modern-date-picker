@@ -30,10 +30,10 @@ dayjs.extend(timezone);
                     }
                 }
                 privateMethods.apply.call(this, false);
-                this.$element.off('.modernDatePicker').on('click.modernDatePicker', (e) => {
-                    e.preventDefault();
-                    privateMethods.toggle.call(this);
-                });
+                // this.$element.off('.modernDatePicker').on('click.modernDatePicker', (e) => {
+                //     e.preventDefault();
+                //     privateMethods.toggle.call(this);
+                // });
                 if (typeof this.options.onInit === 'function') {
                     this.options.onInit.call(this, this.options);
                 }
@@ -71,11 +71,25 @@ dayjs.extend(timezone);
             bindEvents: function() {
                 const self = this;
                 if (!this.$calendar) return;
-                this.$calendar.on('click', '.flight-date-picker-day', function() {
+                this.$calendar.on('click', '.flight-date-picker-day', function(e) {
                     if($(this).hasClass('disabled')) return;
                     const dateStr = $(this).data('date');
                     if (!dateStr) return;
                     privateMethods.selectDate.call(self, dayjs(dateStr));
+                    setTimeout(()=>{
+                        e.target.focus();
+                    },350);
+                });
+                this.$calendar.on('keydown', '.flight-date-picker-day', function(e) {
+                    if (e.key === 'Enter' || e.key === 'Space' || e.keyCode === 13 || e.keyCode === 32) {
+                        if($(this).hasClass('disabled')) return;
+                        const dateStr = $(this).data('date');
+                        if (!dateStr) return;
+                        privateMethods.selectDate.call(self, dayjs(dateStr));
+                        setTimeout(()=>{
+                            e.target.focus();
+                        },350);
+                    }
                 });
                 this.$calendar.find(".flight-date-picker-header").on('click', '.flight-date-picker-apply', function(e) {
                     privateMethods.apply.call(self, true);
@@ -315,6 +329,7 @@ dayjs.extend(timezone);
 
                 const prevDisabled = leftMonthPad === 0;
                 const nextDisabled = rightMonthPad === 0;
+                let dateTabIndex = 1;
                 
                 let html = `
                     <div class="flight-date-picker-prev${prevDisabled ? ' disabled' : ''}" aria-disabled="${prevDisabled}"><span class="flight-date-picker-prev-icon">&#8592;</span></div>
@@ -353,7 +368,7 @@ dayjs.extend(timezone);
                         const dateType = privateMethods.selectedDateType.call(this, date);
                         const isSelected = privateMethods.isSelected.call(this, date);
                         html += `
-                            <div class="flight-date-picker-day ${typeof dateType==="string"?dateType+'-date ':''}  ${isSelected ? 'selected ' : ''} ${isInRange ? 'in-range ' : ''} ${isDisabled ? 'disabled ' : ''}" data-date="${date.format('YYYY-MM-DD\THH:mm:ss')}">${d}</div>
+                            <div tabindex='${dateTabIndex++}' class="flight-date-picker-day ${typeof dateType==="string"?dateType+'-date ':''}  ${isSelected ? 'selected ' : ''} ${isInRange ? 'in-range ' : ''} ${isDisabled ? 'disabled ' : ''}" data-date="${date.format('YYYY-MM-DD\THH:mm:ss')}">${d}</div>
                         `;
                     }
                     for(let d=lastDay+1;d<=6;d++){
@@ -484,6 +499,9 @@ dayjs.extend(timezone);
             }, 10);
             setTimeout(() => {
                 this.$calendar.removeClass('animating');
+                setTimeout(()=>{
+                    this.$calendar.find(".flight-date-picker-day:not(.disabled):not(.empty)").first()[0].focus()
+                },30);
             }, 300);
             privateMethods.render.call(this);
             privateMethods.bindEvents.call(this);

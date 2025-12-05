@@ -287,6 +287,9 @@ input.flight-date-picker-element{
     transition: background 0.2s, color 0.2s;
     border-radius: 0.75rem;
 }
+.flight-date-picker-day:focus-visible{
+    outline: 2px solid var(--mdp-default-color,#007aff);
+}
 
 .flight-date-picker-day.selected {
     background: var(--mdp-default-color,#007aff);
