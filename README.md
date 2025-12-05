@@ -39,6 +39,10 @@ const datePicker = $('#datepicker').modernDatePicker({
     endDate: null,
     minDate: null,
     maxDate: null,
+    theme:{
+        defaultColor: '#007aff',
+        subtleColor: '#e6f0ff'
+    },
     format: 'YYYY-MM-DD',
     popupDateFormat: "YYYY-MM-DD",
     showClear: true,
