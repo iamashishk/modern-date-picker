@@ -118,45 +118,175 @@
     <h1>Modern Date Picker Feature Demos (v1.0.0)</h1>
     
     <div class="demo-container">
-        <!-- Basic Usage -->
         <div class="demo-section">
-            <h2>Basic Usage</h2>
-            <div class="feature-tag">Single Date</div>
+            <h2>1) Basic Range</h2>
+            <div class="feature-tag">Range</div>
+            <div class="feature-tag">Manual Apply</div>
             <div class="input-group">
-                <label for="basic-range">Date Range:</label>
-                <input type="text" id="focusChk" placeholder="any other element for focus check">
-                <input type="text" id="basic-range" placeholder="Select date range">
+                <label for="demo-basic-range">Date Range:</label>
+                <input type="text" id="demo-basic-range" placeholder="Select date range">
+                <div id="demo-basic-output" class="output">Selection: -</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>2) Single Date + Auto Apply</h2>
+            <div class="feature-tag">Single Date</div>
+            <div class="feature-tag">Auto Apply</div>
+            <div class="input-group">
+                <label for="demo-single-date">Date:</label>
+                <input type="text" id="demo-single-date" placeholder="Select one date">
+                <div id="demo-single-output" class="output">Selection: -</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>3) Bounded Window + monthView start</h2>
+            <div class="feature-tag">minDate / maxDate</div>
+            <div class="feature-tag">monthView: start</div>
+            <div class="input-group">
+                <label for="demo-window-start">First-open should start near min side:</label>
+                <input type="text" id="demo-window-start" placeholder="Bounded start-side calendar">
+                <div id="demo-window-start-output" class="output">Selection: -</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>4) Bounded Window + monthView end</h2>
+            <div class="feature-tag">monthView: end</div>
+            <div class="feature-tag">monthsToShow</div>
+            <div class="input-group">
+                <label for="demo-window-end">First-open should end near max side:</label>
+                <input type="text" id="demo-window-end" placeholder="Bounded end-side calendar">
+                <div id="demo-window-end-output" class="output">Selection: -</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>5) Presets</h2>
+            <div class="feature-tag">presets</div>
+            <div class="feature-tag">String / Date inputs</div>
+            <div class="feature-tag">start-only preset</div>
+            <div class="input-group">
+                <label for="demo-presets">Try preset pills above selectors:</label>
+                <input type="text" id="demo-presets" placeholder="Use Yesterday / Last 7 Days / etc.">
+                <div id="demo-presets-output" class="output">Selection: -</div>
             </div>
         </div>
     </div>
 
     <script>
-        let datePicker;
         $(document).ready(function() {
-            datePicker = $('#basic-range').modernDatePicker({
+            const toText = function(startDate, endDate) {
+                if (!startDate && !endDate) return 'Selection: -';
+                const startText = startDate ? startDate.format('YYYY-MM-DD') : '-';
+                const endText = endDate ? endDate.format('YYYY-MM-DD') : '-';
+                return `Selection: ${startText}${endDate ? ' -> ' + endText : ''}`;
+            };
+
+            const bindFocusToOpen = function(selector, picker, active = 'start') {
+                $(selector).on('focus', function() {
+                    picker.switchActiveDateSelector(active);
+                    picker.open();
+                });
+            };
+
+            const basicPicker = $('#demo-basic-range').modernDatePicker({
+                singleDate: false,
+                autoApply: false,
+                format: 'YYYY-MM-DD',
+                popupDateFormat: 'MMM D, YYYY',
+                startLabel: 'Departure',
+                endLabel: 'Return',
+                timezone: 'UTC',
+                closeOnOutsideClick: true,
+                closeOnEscape: true,
+                onChange: function(startDate, endDate) {
+                    $('#demo-basic-output').text(toText(startDate, endDate));
+                },
+            });
+            bindFocusToOpen('#demo-basic-range', basicPicker, 'start');
+
+            const singlePicker = $('#demo-single-date').modernDatePicker({
+                singleDate: true,
+                autoApply: true,
+                format: 'YYYY-MM-DD',
+                popupDateFormat: 'MMM D, YYYY',
+                timezone: 'UTC',
+                onChange: function(startDate, endDate) {
+                    $('#demo-single-output').text(toText(startDate, endDate));
+                },
+            });
+            bindFocusToOpen('#demo-single-date', singlePicker, 'start');
+
+            const windowStartPicker = $('#demo-window-start').modernDatePicker({
                 singleDate: false,
                 autoApply: true,
                 format: 'YYYY-MM-DD',
-                popupFormat: 'MMM D, YYYY',
-                minDate: -3,
-                maxDate: 3645,
-                theme:{
-                    defaultColor: '#2C1B13',
-                    subtleColor: '#2C1B1340'
+                popupDateFormat: 'YYYY-MM-DD',
+                minDate: '2026-01-01',
+                maxDate: '2026-12-31',
+                startDate: '2026-04-10',
+                endDate: '2026-04-20',
+                monthView: 'start',
+                monthsToShow: function() { return 3; },
+                onChange: function(startDate, endDate) {
+                    $('#demo-window-start-output').text(toText(startDate, endDate));
                 },
-                startLabel: 'Departure',
-                endLabel: 'Return',
-                startDate: '2025-12-20',
-                endDate: '2025-12-28',
-                timezone: 'America/New_York',
-                closeOnOutsideClick: true,
-                closeOnEscape: true,
             });
+            bindFocusToOpen('#demo-window-start', windowStartPicker, 'start');
 
-            $('#basic-range').on('focus', function () {
-                datePicker.switchActiveDateSelector('start');
-                datePicker.open();
+            const windowEndPicker = $('#demo-window-end').modernDatePicker({
+                singleDate: false,
+                autoApply: true,
+                format: 'YYYY-MM-DD',
+                popupDateFormat: 'YYYY-MM-DD',
+                minDate: '2026-01-01',
+                maxDate: '2026-12-31',
+                monthView: 'end',
+                monthsToShow: function() { return 3; },
+                onChange: function(startDate, endDate) {
+                    $('#demo-window-end-output').text(toText(startDate, endDate));
+                },
             });
+            bindFocusToOpen('#demo-window-end', windowEndPicker, 'start');
+
+            const today = new Date();
+            const oneDayMs = 24 * 60 * 60 * 1000;
+            const presetsPicker = $('#demo-presets').modernDatePicker({
+                singleDate: false,
+                autoApply: true,
+                format: 'YYYY-MM-DD',
+                popupDateFormat: 'YYYY-MM-DD',
+                minDate: -60,
+                maxDate: 365,
+                monthView: 'start',
+                presets: [
+                    {
+                        title: 'Yesterday',
+                        startDate: new Date(today.getTime() - oneDayMs),
+                        endDate: new Date(today.getTime() - oneDayMs)
+                    },
+                    {
+                        title: 'Last 7 Days',
+                        startDate: new Date(today.getTime() - (6 * oneDayMs)),
+                        endDate: today
+                    },
+                    {
+                        title: 'Last 14 Days',
+                        startDate: new Date(today.getTime() - (13 * oneDayMs)),
+                        endDate: today
+                    },
+                    {
+                        title: '2 Days (Start only)',
+                        startDate: new Date(today.getTime() - oneDayMs)
+                    }
+                ],
+                onChange: function(startDate, endDate) {
+                    $('#demo-presets-output').text(toText(startDate, endDate));
+                },
+            });
+            bindFocusToOpen('#demo-presets', presetsPicker, 'start');
         });
     </script>
 </body>
