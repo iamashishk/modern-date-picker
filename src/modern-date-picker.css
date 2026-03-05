@@ -200,6 +200,42 @@ input.flight-date-picker-element{
     background: #fff;
 }
 
+.flight-date-picker-presets {
+    background: #fff;
+    padding: 12px 20px 0 20px;
+}
+
+.flight-date-picker-presets-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.flight-date-picker-preset-pill {
+    border: 1px solid #d8d8d8;
+    background: #fff;
+    color: #444;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.flight-date-picker-preset-pill:hover {
+    border-color: var(--mdp-default-color,#007aff);
+    color: var(--mdp-default-color,#007aff);
+    background: var(--mdp-subtle-color,#e6f0ff);
+}
+
+.flight-date-picker-preset-pill.active {
+    border-color: var(--mdp-default-color,#007aff);
+    color: var(--mdp-default-color,#007aff);
+    background: var(--mdp-subtle-color,#e6f0ff);
+}
+
 .flight-date-picker-body {
     background: #fff;
     margin: 0 20px 16px 20px;
@@ -525,6 +561,15 @@ input.flight-date-picker-element{
 
     .flight-date-picker-months {
         gap: 0;
+    }
+
+    .flight-date-picker-presets {
+        padding: 10px 12px 0 12px;
+    }
+
+    .flight-date-picker-preset-pill {
+        font-size: 12px;
+        padding: 6px 10px;
     }
 
     .flight-date-picker-month-block {

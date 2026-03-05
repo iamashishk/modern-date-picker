@@ -43,9 +43,10 @@ dayjs.extend(timezone);
             buildCalendar: function() {
                 this.$calendar = $('<div class="flight-date-picker"></div>');
                 this.$header = $('<div class="flight-date-picker-header"></div>');
+                this.$presets = $('<div class="flight-date-picker-presets"></div>');
                 this.$selectors = $('<div class="flight-date-picker-selectors"></div>');
                 this.$body = $('<div class="flight-date-picker-body"></div>');
-                this.$calendar.append(this.$header, this.$selectors, this.$body);
+                this.$calendar.append(this.$header, this.$presets, this.$selectors, this.$body);
                 this.$container = $('<div class="flight-date-picker-container"></div>');
                 this.$container.append(this.$calendar);
                 if(this.options?.theme?.defaultColor){
@@ -62,6 +63,7 @@ dayjs.extend(timezone);
                     this.$calendar.parent().remove();
                     this.$calendar = null;
                     this.$header = null;
+                    this.$presets = null;
                     this.$selectors = null;
                     this.$body = null;
                     this.$footer = null;
@@ -129,6 +131,10 @@ dayjs.extend(timezone);
                     }
                     privateMethods.renderSelectorClasses.call(self);
                 });
+                this.$calendar.find(".flight-date-picker-presets").on('click', '.flight-date-picker-preset-pill', function() {
+                    const presetIndex = $(this).data('index');
+                    privateMethods.applyPreset.call(self, presetIndex);
+                });
                 if(self.options.closeOnOutsideClick){
                     this.boundDocumentClick = function(e) {
                         if (self.popupOpen) {
@@ -186,6 +192,7 @@ dayjs.extend(timezone);
             render: function() {
                 if (!this.$calendar) return;
                 privateMethods.renderHeader.call(this);
+                privateMethods.renderPresets.call(this);
                 privateMethods.renderSelectors.call(this);
                 privateMethods.renderSelectorClasses.call(this);
                 privateMethods.renderMonthsOnly.call(this);
@@ -263,6 +270,32 @@ dayjs.extend(timezone);
                 `);
             },
 
+            isPresetActive: function(preset) {
+                if (!preset || !preset.startDate || !this.options.startDate) return false;
+                const sameStart = this.options.startDate.format('YYYY-MM-DD') === preset.startDate.format('YYYY-MM-DD');
+                if (!sameStart) return false;
+                if (!preset.endDate) {
+                    return !this.options.endDate;
+                }
+                return !!this.options.endDate && this.options.endDate.format('YYYY-MM-DD') === preset.endDate.format('YYYY-MM-DD');
+            },
+
+            renderPresets: function() {
+                if (!this.$presets) return;
+                if (!Array.isArray(this.options.presets) || this.options.presets.length === 0) {
+                    this.$presets.html('').hide();
+                    return;
+                }
+                let html = '<div class="flight-date-picker-presets-wrap">';
+                for (let index = 0; index < this.options.presets.length; index++) {
+                    const preset = this.options.presets[index];
+                    const activeClass = privateMethods.isPresetActive.call(this, preset) ? ' active' : '';
+                    html += `<button type="button" class="flight-date-picker-preset-pill${activeClass}" data-index="${index}">${preset.title}</button>`;
+                }
+                html += '</div>';
+                this.$presets.html(html).show();
+            },
+
             renderSelectorClasses: function(){
                 if (!this.activeSelector || this.activeSelector==="start") {
                     this.$calendar.find(".segment.start-segment").addClass("active");
@@ -275,6 +308,74 @@ dayjs.extend(timezone);
                 }
             },
 
+            applyPreset: function(presetIndex) {
+                if (!Array.isArray(this.options.presets)) return;
+                const preset = this.options.presets[presetIndex];
+                if (!preset || !dayjs.isDayjs(preset.startDate) || !preset.startDate.isValid()) return;
+
+                this.options.startDate = preset.startDate.clone().startOf('day');
+
+                if (this.options.singleDate) {
+                    this.options.endDate = null;
+                    this.activeSelector = 'start';
+                } else if (preset.endDate && dayjs.isDayjs(preset.endDate) && preset.endDate.isValid()) {
+                    this.options.endDate = preset.endDate.clone().endOf('day');
+                    if (this.options.endDate < this.options.startDate) {
+                        const tmp = this.options.startDate;
+                        this.options.startDate = this.options.endDate;
+                        this.options.endDate = tmp;
+                    }
+                    this.activeSelector = null;
+                } else {
+                    this.options.endDate = null;
+                    this.activeSelector = 'end';
+                }
+
+                this.currentMonth = null;
+                privateMethods.render.call(this);
+
+                if (typeof this.options.onSelect === 'function') {
+                    this.options.onSelect.call(this, this.options.startDate, this.options.endDate);
+                }
+
+                if (typeof this.options.autoApply === 'boolean' && this.options.autoApply) {
+                    if (this.options.singleDate || (this.options.startDate !== null && this.options.endDate !== null)) {
+                        privateMethods.apply.call(this);
+                    }
+                }
+            },
+
+            getInitialMonthStart: function(monthsToShow) {
+                const nowMonth = dayjs.utc().tz(this.options.timezone).startOf('month');
+                let monthStart = null;
+                if (this.options.monthView === 'end') {
+                    if (this.options.endDate) {
+                        monthStart = dayjs(this.options.endDate).startOf('month');
+                    } else if (this.options.maxDateMonth) {
+                        monthStart = dayjs(this.options.maxDateMonth).startOf('month');
+                    } else {
+                        monthStart = nowMonth;
+                    }
+                    monthStart = monthStart.subtract(Math.max(monthsToShow - 1, 0), 'month');
+                } else {
+                    if (this.options.startDate) {
+                        monthStart = dayjs(this.options.startDate).startOf('month');
+                    } else if (this.options.minDateMonth) {
+                        monthStart = dayjs(this.options.minDateMonth).startOf('month');
+                    } else {
+                        monthStart = nowMonth;
+                    }
+                }
+
+                if (this.options.minDateMonth && monthStart.diff(this.options.minDateMonth, 'month') < 0) {
+                    monthStart = dayjs(this.options.minDateMonth).startOf('month');
+                }
+                if (this.options.maxDateMonth && monthStart.diff(this.options.maxDateMonth, 'month') > 0) {
+                    monthStart = dayjs(this.options.maxDateMonth).startOf('month');
+                }
+                return monthStart.startOf('month');
+            },
+
             renderMonthsOnly: function(slideDirection = null) {
                 if (!this.$body) return;
                 const monthsToShow = privateMethods.getMonthsToShow.call(this);
@@ -282,13 +383,14 @@ dayjs.extend(timezone);
 
                 let monthArrayStart = this.currentMonth;
                 if(!monthArrayStart){
-                    if(this.options.startDate){
-                        monthArrayStart = dayjs(this.options.startDate).startOf('month');
-                    }else if(this.options.minDateMonth){
-                        monthArrayStart = dayjs(this.options.minDateMonth).startOf('month');
-                    }else{
-                        monthArrayStart = dayjs.utc().tz(this.options.timezone).startOf('month');
-                    }
+                    monthArrayStart = privateMethods.getInitialMonthStart.call(this, monthsToShow);
+                }
+
+                if(this.options.minDateMonth && monthArrayStart.diff(this.options.minDateMonth, 'month') < 0){
+                    monthArrayStart = dayjs(this.options.minDateMonth).startOf('month');
+                }
+                if(this.options.maxDateMonth && monthArrayStart.diff(this.options.maxDateMonth, 'month') > 0){
+                    monthArrayStart = dayjs(this.options.maxDateMonth).startOf('month');
                 }
 
                 if(this.options.minDateMonth){
@@ -560,6 +662,17 @@ dayjs.extend(timezone);
         this.element = element;
         this.$element = $(element);
         this.options = $.extend({}, modernDatePicker.defaults, options);
+        const normalizeDateInput = function(value, timezoneName, endOfDay = false) {
+            if (value === undefined || value === null) return null;
+            let parsedDate = null;
+            if (dayjs.isDayjs(value)) {
+                parsedDate = value.tz(timezoneName);
+            } else {
+                parsedDate = dayjs.tz(value, timezoneName);
+            }
+            if (!parsedDate || !parsedDate.isValid()) return null;
+            return endOfDay ? parsedDate.endOf('day') : parsedDate.startOf('day');
+        };
         dayjs.tz.setDefault(options.timezone);
         if(options.minDate!==null){
             if(isNaN(options.minDate)){
@@ -582,18 +695,42 @@ dayjs.extend(timezone);
             options['maxDateMonth'] = options.maxDate.clone().startOf('month');
         }
         if(options.startDate){
-            options.startDate = dayjs.tz(options.startDate,options.timezone).startOf('day');
-            if(options.minDate && options.startDate.isBefore(options.minDate)){
+            options.startDate = normalizeDateInput(options.startDate, options.timezone, false);
+            if(options.startDate && options.minDate && options.startDate.isBefore(options.minDate)){
                 options.startDate = null;
             }
         }
         if(options.endDate){
-            options.endDate = dayjs.tz(options.endDate,options.timezone).endOf('day');
-            if(options.maxDate && options.endDate.isAfter(options.maxDate)){
+            options.endDate = normalizeDateInput(options.endDate, options.timezone, true);
+            if(options.endDate && options.maxDate && options.endDate.isAfter(options.maxDate)){
                 options.endDate = null;
             }
         }
+        if (Array.isArray(options.presets)) {
+            options.presets = options.presets.reduce((accumulator, preset) => {
+                if (!preset || typeof preset !== 'object') return accumulator;
+                const title = typeof preset.title === 'string' ? preset.title.trim() : '';
+                if (!title) return accumulator;
+                const presetStartDate = normalizeDateInput(preset.startDate, options.timezone, false);
+                if (!presetStartDate) return accumulator;
+                let presetEndDate = null;
+                if (preset.endDate !== undefined && preset.endDate !== null) {
+                    presetEndDate = normalizeDateInput(preset.endDate, options.timezone, true);
+                }
+                accumulator.push({
+                    title,
+                    startDate: presetStartDate,
+                    endDate: presetEndDate
+                });
+                return accumulator;
+            }, []);
+        } else {
+            options.presets = [];
+        }
         this.options = $.extend({}, modernDatePicker.defaults, options);
+        if(this.options.monthView !== 'start' && this.options.monthView !== 'end'){
+            this.options.monthView = 'start';
+        }
         privateMethods.init.call(this);
         
     };
@@ -620,7 +757,9 @@ dayjs.extend(timezone);
         startLabel: 'Start Date',
         endLabel: 'End Date',
         timezone: "UTC",
-        monthsToShow: null
+        monthsToShow: null,
+        monthView: 'start',
+        presets: []
     };
 
     $.fn.modernDatePicker = function(options) {
